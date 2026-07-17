@@ -17,40 +17,35 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<style>
 			main {
 				width: calc(100% - 2em);
-				max-width: 100%;
+				max-width: 1020px;
 				margin: 0;
 			}
-			.hero-image {
-				width: 100%;
-			}
+			.hero-image { width: 100%; }
 			.hero-image img {
 				display: block;
 				margin: 0 auto;
 				border-radius: 12px;
-				box-shadow: var(--box-shadow);
+				box-shadow: var(--shadow);
+			}
+			.layout {
+				display: flex;
+				gap: 2.5em;
+				align-items: flex-start;
+				padding: 1em;
 			}
 			.prose {
 				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
+				max-width: 100%;
+				margin: 0 auto;
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
+			.title { margin-bottom: 1em; padding: 1em 0; text-align: center; line-height: 1.1; }
+			.title h1 { margin: 0 0 0.5em 0; font-size: 2.1em; }
+			.date { margin-bottom: 0.5em; color: var(--ink-soft); font-size: 0.9rem; }
+			.last-updated-on { font-style: italic; }
+			.ad-rail { position: sticky; top: 1.5em; }
+			@media (max-width: 900px) {
+				.layout { flex-direction: column; padding: 1em 0.5em; }
+				.ad-rail { display: none; }
 			}
 		</style>
 	</head>
@@ -59,25 +54,36 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
+				{
+					heroImage && (
+						<div class="hero-image">
+							<Image width={1020} height={510} src={heroImage} alt="" />
 						</div>
-						<h1>{title}</h1>
-						<hr />
+					)
+				}
+				<div class="layout">
+					<div class="prose">
+						<div class="title">
+							<div class="date">
+								<FormattedDate date={pubDate} />
+								{
+									updatedDate && (
+										<div class="last-updated-on">
+											Last updated on <FormattedDate date={updatedDate} />
+										</div>
+									)
+								}
+							</div>
+							<h1>{title}</h1>
+							<hr />
+						</div>
+						<slot />
+						<!-- AdSense unit: end of post -->
+						<div class="ad-end"></div>
 					</div>
-					<slot />
+					<aside class="ad-rail" aria-hidden="true">
+						<!-- AdSense unit: sidebar -->
+					</aside>
 				</div>
 			</article>
 		</main>

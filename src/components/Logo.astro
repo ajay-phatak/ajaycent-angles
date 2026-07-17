@@ -1,0 +1,38 @@
+---
+interface Props {
+	size?: number;
+	showWordmark?: boolean;
+}
+const { size = 28, showWordmark = true } = Astro.props;
+---
+
+<a href="/" class="logo-link">
+	<svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" class="logo-mark">
+		<path d="M10 38 L34 8 L10 8 Z" fill="var(--accent-soft)" />
+		<path
+			d="M10 38 L10 8 M10 38 L34 8 M10 38 L40 30"
+			stroke="var(--ink)"
+			stroke-width="3"
+			stroke-linecap="round"
+			fill="none"
+		/>
+		<circle cx="10" cy="38" r="2.7" fill="var(--ink)" />
+	</svg>
+	{showWordmark && <span class="wordmark">Ajaycent Angles</span>}
+</a>
+<style>
+	.logo-link {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		text-decoration: none;
+	}
+	.wordmark {
+		font-family: var(--font-serif);
+		font-weight: 700;
+		font-size: 1.05rem;
+		color: var(--ink);
+		letter-spacing: -0.01em;
+	}
+	.logo-mark { flex-shrink: 0; }
+</style>

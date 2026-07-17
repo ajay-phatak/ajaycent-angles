@@ -2,6 +2,7 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Logo from '../components/Logo.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 ---
 
@@ -12,21 +13,43 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	</head>
 	<body>
 		<Header />
-		<main>
-			<h1>Ajaycent Angles</h1>
-			<p>
-				Essays and analysis on tech, finance, politics, and philosophy — with a particular interest
-				in the places where those fields touch. The name is a reference to <em>adjacent angles</em>: two
-				angles that share a common side. That's where the interesting ideas tend to live.
+		<main class="hero">
+			<div class="hero-top">
+				<Logo size={56} showWordmark={false} />
+				<div>
+					<p class="kicker">Tech · Finance · Politics · Philosophy</p>
+					<h1>Where ideas share an edge.</h1>
+				</div>
+			</div>
+			<p class="lead">
+				Essays on the places where technology, markets, politics, and philosophy touch —
+				written by Ajay Phatak. Named for <em>adjacent angles</em>: two angles sharing a common
+				side, which is usually where the interesting argument lives.
 			</p>
-			<p>
-				Start with the <a href="/blog/">blog</a>, or jump straight into the site's first live data
-				project: the <a href="https://elections.ajaycent.com">2026 Election Tracker</a>, a dashboard
-				showing the current state of the race for the US Midterms at a glance complete with polls,
-				ratings, betting odds, and recent news for every contest.
-			</p>
-			<p>More about the site and its author on the <a href="/about/">about page</a>.</p>
+			<div class="cta-row">
+				<a class="btn btn-primary" href="/blog/">Read the blog</a>
+				<a class="btn btn-secondary" href="https://elections.ajaycent.com">2026 Election Tracker ↗</a>
+			</div>
 		</main>
 		<Footer />
 	</body>
 </html>
+<style>
+	.hero { padding: 4em 1em 2em; }
+	.hero-top {
+		display: flex;
+		align-items: center;
+		gap: 18px;
+		margin-bottom: 1.2em;
+	}
+	.hero-top h1 { margin: 0; font-size: 2.5em; }
+	.lead {
+		font-size: 1.1rem;
+		max-width: 34em;
+		margin: 0 0 1.6em;
+	}
+	.cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+	@media (max-width: 600px) {
+		.hero-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+	}
+</style>
