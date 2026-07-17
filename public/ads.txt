@@ -1,0 +1,4 @@
+# ads.txt for ajaycent.com — also covers subdomains (elections.ajaycent.com).
+# After AdSense approval, replace this comment with the line from the AdSense
+# dashboard (Sites -> ads.txt), which looks like:
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
