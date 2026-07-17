@@ -1,0 +1,32 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Ajaycent Angles</h1>
+			<p>
+				Essays and analysis on tech, finance, politics, and philosophy — with a particular interest
+				in the places where those fields touch. The name is a pun on <em>adjacent angles</em>: two
+				angles that share a common side. That's where the interesting ideas tend to live.
+			</p>
+			<p>
+				Start with the <a href="/blog/">blog</a>, or jump straight into the site's first live data
+				project: the <a href="https://elections.ajaycent.com">2026 Election Tracker</a>, a dashboard
+				following Senate and House races through the 2026 midterms with polling trends, race
+				ratings, and news for every contest.
+			</p>
+			<p>More about the site and its author on the <a href="/about/">about page</a>.</p>
+		</main>
+		<Footer />
+	</body>
+</html>
