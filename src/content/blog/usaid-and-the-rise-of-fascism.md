@@ -1,0 +1,21 @@
+---
+title: 'USAID and the Rise of Fascism'
+description: 'Dissolving USAID was never about the budget — it''s about consolidating executive power. And we should stop being afraid to name what that is.'
+pubDate: 'Feb 5 2025'
+---
+
+*Originally posted on Facebook, February 5, 2025.*
+
+It's been a minute since I made one of these political essay posts. Partly this is just cause I've been busy with the rest of my life, but the more alarming reason is that there are so many wild and terrible things happening that it's hard to even process it in time. By the time I've fully gathered my thoughts on a subject, it's already old news :'). But there are two things that stand out that I think are extra important in the midst of all the debauchery: the potential dissolution of USAID, and the language that we're "allowed" to use around these sorts of actions.
+
+There are a few things that people are missing about the dissolution of USAID, most of which are important, but one of which is REALLY IMPORTANT:
+
+Firstly, this is being sold as a budget cut for efficient government spending, and I'm sure in the next several weeks there will be all sorts of weird ways that they were using money that get uncovered that conservatives will be using to retroactively justify this, but to be clear, USAID was less than 1% of our budget, so it really has nothing to do with that.
+
+Secondly, there's some talk about how Americans don't want any of their tax dollars going to foreign aid in the current political climate, but even if you had no empathy and wanted to be fully self-serving and America first, USAID is still useful as a thorn in the side of China trying to assert their soft power in the world. In general, I wish more people realized that the alternative to the US helping a country isn't nobody helping them, it's one of the other powers of the world helping them, and gaining global influence. And hey, as corrupt as the US can be sometimes, even a flawed democracy should be preferable to an autocracy when it comes to global power.
+
+And finally, AND THIS ONE IS IMPORTANT, the dissolution of USAID is arguably less important than the way it's been done. Republicans currently control all parts of the government, and it's not like there's much dissent in the ranks. The way to advance your career as a Republican right now is just showing fealty to Donald Trump. Not being effective or knowledgeable, just kissing the ring. So then why didn't they dissolve USAID the normal legal way through an act of congress, when they could have easily done so? Well it's because they care less about cutting government programs and more about consolidating executive power and eroding the separation of powers that has made our government so foolproof for so many years.
+
+This brings me to the second thing I wanted to address: the language that we're allowed to use to describe these sorts of actions taken by the Trump administration (or Elon administration? who even knows anymore). I must confess that democrats have a bit of an issue where parts of the party have been the boy who cried wolf, and so now our whole party is paying the price. This move from the current administration is unarguably fascistic in nature, and while we're not there yet, the administration is trending in a fascist direction, and Trump is clearly a wannabe fascist. But it feels like too many other people were called a fascist before and now the word has lost meaning. News outlets are afraid to call a spade a spade for fear of being labeled as biased. …my problem with that is they just get labeled as biased anyways. I don't think we should be afraid to call out what's actually happening. What did we get for trying to be 'fair' with coverage? What did we get for Merrick Garland not aggressively prosecuting Trump for Jan 6? What did Biden get for allowing the Hunter case to go down as it did and pretending like that would make Trump be held accountable as well? Like, literally what was it all for? I don't think you ever gain anything from trying to appease radical groups because no amount of concession will ever be enough for them.
+
+And just to be clear, in case people think I'm blaming lefties for the rise of Trump or something: in the story of the boy who cried wolf, yes, the boy made a mistake, but he's not in the same category as the wolf itself.
