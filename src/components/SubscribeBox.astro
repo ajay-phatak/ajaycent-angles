@@ -1,0 +1,89 @@
+---
+import { KIT_FORM_ID } from '../consts';
+---
+
+<section class="subscribe-box">
+	<p class="kicker">Newsletter</p>
+	<h2>Get new essays by email</h2>
+	<p>No spam, no schedule — just a note when something new is published. Unsubscribe anytime.</p>
+	<form action={`https://app.kit.com/forms/${KIT_FORM_ID}/subscriptions`} method="post" data-subscribe-form>
+		<input type="email" name="email_address" placeholder="you@example.com" required autocomplete="email" aria-label="Email address" />
+		<button type="submit" class="btn btn-primary">Subscribe</button>
+	</form>
+	<p class="subscribe-msg" data-subscribe-msg role="status" aria-live="polite" hidden></p>
+</section>
+<style>
+	.subscribe-box {
+		background: var(--bg-raised);
+		border: 1px solid var(--rule);
+		border-radius: 12px;
+		box-shadow: var(--shadow);
+		padding: 1.6em;
+	}
+	.subscribe-box h2 { margin-bottom: 0.3em; }
+	.subscribe-box form {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+	.subscribe-box input {
+		flex: 1;
+		min-width: 12em;
+		background: var(--bg);
+		border: 1px solid var(--rule);
+		color: var(--ink);
+		border-radius: 6px;
+		padding: 0.55em 0.8em;
+		font: inherit;
+	}
+	.subscribe-box input:focus {
+		border-color: var(--accent);
+		outline: none;
+	}
+	.subscribe-box button.btn {
+		border: none;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.subscribe-msg {
+		margin: 0.8em 0 0;
+		color: var(--accent);
+	}
+</style>
+<script is:inline>
+	(function () {
+		var forms = document.querySelectorAll('[data-subscribe-form]');
+		forms.forEach(function (form) {
+			form.addEventListener('submit', function (event) {
+				event.preventDefault();
+				var button = form.querySelector('button[type="submit"]');
+				var msg = form.parentElement
+					? form.parentElement.querySelector('[data-subscribe-msg]')
+					: null;
+				if (!msg) return;
+				if (button) button.disabled = true;
+				fetch(form.action, {
+					method: 'POST',
+					body: new FormData(form),
+					headers: { Accept: 'application/json' },
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error('Request failed');
+						return res.json();
+					})
+					.then(function (data) {
+						// Kit returns HTTP 200 even on failure; the JSON status is authoritative.
+						if (data.status !== 'success') throw new Error('Subscription failed');
+						form.hidden = true;
+						msg.textContent = 'Check your inbox to confirm your subscription.';
+						msg.hidden = false;
+					})
+					.catch(function () {
+						msg.textContent = 'Something went wrong — please try again.';
+						msg.hidden = false;
+						if (button) button.disabled = false;
+					});
+			});
+		});
+	})();
+</script>

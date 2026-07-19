@@ -4,3 +4,8 @@
 export const SITE_TITLE = 'Ajaycent Angles';
 export const SITE_DESCRIPTION =
 	'Essays and analysis on tech, finance, politics, and philosophy — and the unexpected angles that connect them.';
+
+// Kit (ConvertKit) form ID for the email subscription boxes
+export const KIT_FORM_ID = '9701840';
+// PayPal secure merchant ID for the donate button (from paypal.com/donate/buttons)
+export const PAYPAL_BUSINESS_ID = 'J4SNUXSJMLVGA';
