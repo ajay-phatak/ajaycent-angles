@@ -8,26 +8,32 @@ import { PAYPAL_BUSINESS_ID } from '../consts';
 	title="Support Ajaycent Angles"
 	description="Ways to support the site — donate via PayPal or subscribe to new essays by email."
 	pubDate={new Date('July 19 2026')}
+	centered
 >
 	<p>
 		This site is free, independent, and ad-supported. If an essay here was worth your time, there
 		are two ways to help keep it going.
 	</p>
 
-	<h2>Donate</h2>
-	<p>
-		Donations are processed entirely by PayPal — this site never sees your payment details.
-	</p>
-	<form action="https://www.paypal.com/donate" method="post" target="_blank">
-		<input type="hidden" name="business" value={PAYPAL_BUSINESS_ID} />
-		<input type="hidden" name="no_recurring" value="0" />
-		<input type="hidden" name="currency_code" value="USD" />
-		<button type="submit" class="btn btn-primary">Donate with PayPal</button>
-	</form>
-
-	<h2>Subscribe (free)</h2>
-	<p>Can't donate? Subscribing helps just as much.</p>
-	<SubscribeBox />
+	<div class="ways">
+		<section>
+			<h2>Donate</h2>
+			<p>
+				Donations are processed entirely by PayPal — this site never sees your payment details.
+			</p>
+			<form action="https://www.paypal.com/donate" method="post" target="_blank">
+				<input type="hidden" name="business" value={PAYPAL_BUSINESS_ID} />
+				<input type="hidden" name="no_recurring" value="0" />
+				<input type="hidden" name="currency_code" value="USD" />
+				<button type="submit" class="btn btn-primary">Donate with PayPal</button>
+			</form>
+		</section>
+		<section>
+			<h2>Subscribe</h2>
+			<p>Can't donate? Subscribing helps just as much.</p>
+			<SubscribeBox />
+		</section>
+	</div>
 
 	<p>
 		Sharing a post also helps. Questions: <a href="mailto:ajay.phatak2@gmail.com"
@@ -40,5 +46,15 @@ import { PAYPAL_BUSINESS_ID } from '../consts';
 		border: none;
 		cursor: pointer;
 		font-family: inherit;
+	}
+	.ways {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2em;
+		align-items: start;
+	}
+	.ways h2 { margin-top: 0; }
+	@media (max-width: 720px) {
+		.ways { grid-template-columns: 1fr; }
 	}
 </style>
