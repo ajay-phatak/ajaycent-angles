@@ -8,15 +8,21 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "preview": "npm run build && wrangler dev",
+    "astro": "astro",
+    "generate-types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.1.4",
     "@astrojs/mdx": "^7.0.3",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.1.1",
     "chart.js": "^4.5.1",
     "sharp": "^0.35.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.113.0"
   }
 }
