@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-&#x9;<path d="M10 38 L34 8 L10 8 Z" class="wedge"></path>
-&#x9;<path d="M10 38 L10 8 M10 38 L34 8 M10 38 L40 30" class="lines" fill="none" stroke-width="3.4" stroke-linecap="round"></path>
-&#x9;<circle cx="10" cy="38" r="2.9" class="dot"></circle>
-&#x9;
+	<title>Ajaycent Angles</title>
+	<rect width="48" height="48" rx="10" fill="#006869"></rect>
+	<path d="M12 37 L33 11 L12 11 Z" fill="#ffffff" fill-opacity="0.18"></path>
+	<path
+		d="M12 37 L12 11 M12 37 L33 11 M12 37 L38 30"
+		fill="none"
+		stroke="#fbf8f4"
+		stroke-width="4"
+		stroke-linecap="round"
+	></path>
+	<circle cx="12" cy="37" r="3.2" fill="#fbf8f4"></circle>
 </svg>
