@@ -1,0 +1,218 @@
+---
+// Clean energy share of U.S. electricity generation, 2021–2026.
+// Spans the January 2025 handover so the trend reads as administration-agnostic.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch line-teal"></i>Wind + solar</span>
+		<span><i class="swatch line-teal-dim"></i>All renewables</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="clean-energy-chart"
+			role="img"
+			aria-label="Clean energy's share of U.S. electricity generation from 2021 to 2026. Wind and solar rise from 12 percent to 21.8 percent and all renewables from 20 percent to 30 percent, continuing at the same pace across the January 2025 change of administration."
+		>
+			Wind and solar grew from 12% of U.S. electricity generation in 2021 to 21.8% in 2026,
+			with no break in trend at the 2025 change of administration.
+		</canvas>
+	</div>
+
+	<figcaption>
+		2026 reflects January–April generation. Source: U.S. Energy Information Administration.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.line-teal { height: 3px; background: var(--accent); }
+	.line-teal-dim { height: 2px; background: var(--accent); opacity: 0.5; }
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 380px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 300px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	const labels = ['2021', '2022', '2023', '2024', '2025', '2026*'];
+	const windSolar = [12, 14, 16, 17.2, 18.9, 21.8];
+	const allRenewables = [20, 22, 21, 22.7, 26, 30];
+	const SPLIT = 3.5; // January 2025 handover, between the 2024 and 2025 points
+
+	function render() {
+		const canvas = document.getElementById('clean-energy-chart');
+		if (!canvas) return;
+		const c = palette();
+		Chart.getChart(canvas)?.destroy();
+
+		const divider = {
+			id: 'adminDivider',
+			afterDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				const x = scales.x.getPixelForValue(SPLIT);
+				ctx.save();
+				ctx.setLineDash([4, 4]);
+				ctx.lineWidth = 1;
+				ctx.strokeStyle = c.inkSoft;
+				ctx.beginPath();
+				ctx.moveTo(x, a.top + 2);
+				ctx.lineTo(x, a.bottom);
+				ctx.stroke();
+				ctx.setLineDash([]);
+				ctx.font = `italic 11px ${c.serif}`;
+				ctx.fillStyle = c.inkSoft;
+				ctx.textBaseline = 'top';
+				ctx.textAlign = 'right';
+				ctx.fillText('Biden administration', x - 8, a.top + 2);
+				ctx.textAlign = 'left';
+				ctx.fillText('Trump administration', x + 8, a.top + 2);
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'line',
+			data: {
+				labels,
+				datasets: [
+					{
+						label: 'Wind + solar',
+						data: windSolar,
+						borderColor: c.teal,
+						backgroundColor: c.fill,
+						fill: true,
+						borderWidth: 2.75,
+						tension: 0.25,
+						pointRadius: 4,
+						pointBackgroundColor: c.teal,
+						pointBorderColor: c.bg,
+						pointBorderWidth: 2,
+					},
+					{
+						label: 'All renewables',
+						data: allRenewables,
+						borderColor: c.tealDim,
+						borderWidth: 1.75,
+						tension: 0.25,
+						pointRadius: 3,
+						pointBackgroundColor: c.tealDim,
+						pointBorderColor: c.bg,
+						pointBorderWidth: 1.5,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				// Draw immediately: an entry animation adds nothing to a reference chart,
+				// and it means the chart is never blank while off-screen or reduced-motion.
+				animation: false,
+				layout: { padding: { top: 26, right: 8 } },
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: { label: (x) => `${x.dataset.label}: ${x.parsed.y.toFixed(1)}%` },
+					},
+				},
+				scales: {
+					y: {
+						min: 0,
+						max: 34,
+						title: {
+							display: true,
+							text: 'Share of U.S. electricity generation',
+							color: c.inkSoft,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: 11 },
+							stepSize: 5,
+							callback: (v) => `${v}%`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+					x: {
+						ticks: { color: c.inkSoft, font: { family: c.serif, size: 12 } },
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [divider],
+		});
+	}
+
+	/*
+	  The theme toggle writes data-theme during load, which can land mid-init and
+	  race Chart.js. Debounce so we always settle on one build of the chart.
+	*/
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[CleanEnergyChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+</script>

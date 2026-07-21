@@ -1,0 +1,359 @@
+---
+// Strategic Petroleum Reserve vs. WTI futures/spot, Jan 2025 – Jul 2026.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch line-teal"></i>Strategic Petroleum Reserve</span>
+		<span><i class="swatch line-warm"></i>WTI 12-month futures</span>
+		<span><i class="swatch line-warm-faint"></i>WTI spot</span>
+		<span><i class="swatch band"></i>Usable reserve</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="spr-chart"
+			role="img"
+			aria-label="The U.S. Strategic Petroleum Reserve against WTI oil prices from January 2025 to July 2026. The reserve refills to a peak of 415 million barrels in early March 2026, then falls to 316.5 million by July. WTI spot spikes to about $98 during the war while 12-month futures stay near $78."
+		>
+			The SPR fell from 415 million barrels to 316.5 million between March and July 2026,
+			consuming about 61% of the reserve usable above the statutory floor.
+		</canvas>
+	</div>
+
+	<ol class="chart-key">
+		<li><b>1</b> 12-Day War · Jun 2025</li>
+		<li><b>2</b> Operation Epic Fury · Feb 28 2026</li>
+		<li><b>3</b> 172M-bbl release · Mar 11</li>
+		<li><b>4</b> Ceasefire · Apr 8</li>
+	</ol>
+
+	<figcaption>
+		Reserve levels: U.S. Energy Information Administration weekly stocks. Statutory floor of
+		252.4M barrels per 42 U.S.C. §6241. Futures series is indicative of the term structure
+		reported during the conflict.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.line-teal { height: 3px; background: var(--accent); }
+	.line-warm { height: 3px; background: #b06135; }
+	.line-warm-faint { height: 2px; background: #b06135; opacity: 0.45; }
+	.band {
+		height: 11px;
+		background: color-mix(in oklch, var(--accent) 10%, transparent);
+		border-top: 1px dashed var(--accent);
+		border-bottom: 1px dashed var(--accent);
+	}
+	:global([data-theme='dark']) .line-warm,
+	:global([data-theme='dark']) .line-warm-faint { background: #d98f63; }
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 400px;
+	}
+	.chart-key {
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4em 1.4em;
+		margin: 0.9em 0 0;
+		padding: 0;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-key b {
+		color: var(--ink);
+		margin-right: 0.35em;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 320px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	const labels = [
+		"Jan '25", 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+		"Jan '26", 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+	];
+	const spr = [
+		393.8, 395.3, 395.6, 396.7, 399.1, 402.1, 403.0, 403.0, 405.2, 407.0, 410.4, 411.9,
+		413.5, 415.2, 415.4, 413.3, 392.7, 349.2, 316.5,
+	];
+	const futures = [67, 66, 65, 62, 61, 64, 64, 63, 63, 61, 60, 59, 60, 65, 74, 78, 76, 74, 78];
+	const spot = [74, 71, 68, 62, 60, 66, 66, 64, 64, 61, 59, 58, 60, 68, 91, 98, 88, 78, 82];
+
+	const WAR = 14;
+	const LAST = spr.length - 1;
+	const FLOOR = 252.4;
+	const PEAK = 415.4;
+
+	const thresholds = [
+		{ y: 727, label: 'All-time high · 727M', key: false },
+		{ y: PEAK, label: 'Pre-war peak · 415M', key: false },
+		{ y: FLOOR, label: 'Statutory drawdown floor · 252M', key: true },
+		{ y: 180, label: 'IEA 90-day minimum · 180M', key: false },
+	];
+	const events = [
+		{ x: 5, n: '1' },
+		{ x: 13.9, n: '2' },
+		{ x: 14.45, n: '3' },
+		{ x: 15.25, n: '4' },
+	];
+
+	function render() {
+		const canvas = document.getElementById('spr-chart');
+		if (!canvas) return;
+		const c = palette();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'sprOverlay',
+			beforeDatasetsDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				ctx.save();
+				ctx.fillStyle = c.band;
+				const top = scales.yL.getPixelForValue(PEAK);
+				ctx.fillRect(a.left, top, a.right - a.left, scales.yL.getPixelForValue(FLOOR) - top);
+				ctx.restore();
+			},
+			afterDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				ctx.save();
+				thresholds.forEach((t) => {
+					const y = scales.yL.getPixelForValue(t.y);
+					ctx.setLineDash([5, 4]);
+					ctx.lineWidth = t.key ? 1.75 : 1;
+					ctx.strokeStyle = t.key ? c.teal : c.inkSoft;
+					ctx.beginPath();
+					ctx.moveTo(a.left, y);
+					ctx.lineTo(a.right, y);
+					ctx.stroke();
+					ctx.setLineDash([]);
+					ctx.font = `italic ${t.key ? 11 : 10.5}px ${c.serif}`;
+					ctx.fillStyle = t.key ? c.teal : c.inkSoft;
+					ctx.textAlign = 'left';
+					ctx.textBaseline = 'bottom';
+					ctx.fillText(t.label, a.left + 7, y - 3);
+				});
+				events.forEach((e) => {
+					const x = scales.x.getPixelForValue(e.x);
+					ctx.setLineDash([3, 4]);
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = c.inkSoft;
+					ctx.beginPath();
+					ctx.moveTo(x, a.top + 13);
+					ctx.lineTo(x, a.bottom);
+					ctx.stroke();
+					ctx.setLineDash([]);
+					ctx.beginPath();
+					ctx.arc(x, a.top + 6, 8, 0, Math.PI * 2);
+					ctx.fillStyle = c.bg;
+					ctx.fill();
+					ctx.lineWidth = 1.25;
+					ctx.strokeStyle = c.inkSoft;
+					ctx.stroke();
+					ctx.font = `500 10px ${c.serif}`;
+					ctx.fillStyle = c.ink;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(e.n, x, a.top + 6.5);
+				});
+				ctx.restore();
+			},
+			afterDatasetsDraw(ch) {
+				const { ctx, scales } = ch;
+				ctx.save();
+				ctx.font = `500 11px ${c.serif}`;
+				ctx.fillStyle = c.teal;
+				ctx.textAlign = 'right';
+				ctx.textBaseline = 'top';
+				ctx.fillText(
+					'316.5M',
+					scales.x.getPixelForValue(LAST) - 4,
+					scales.yL.getPixelForValue(spr[LAST]) + 8,
+				);
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'line',
+			data: {
+				labels,
+				datasets: [
+					{
+						label: 'SPR',
+						data: spr,
+						yAxisID: 'yL',
+						borderColor: c.teal,
+						borderWidth: 2.75,
+						tension: 0.15,
+						pointRadius: (ctx) => (ctx.dataIndex === LAST ? 4.5 : 0),
+						pointBackgroundColor: c.teal,
+						pointBorderColor: c.bg,
+						pointBorderWidth: 2,
+						segment: { borderColor: (ctx) => (ctx.p0DataIndex >= WAR ? c.teal : c.tealDim) },
+					},
+					{
+						label: 'WTI 12-mo futures',
+						data: futures,
+						yAxisID: 'yR',
+						borderColor: c.warm,
+						borderWidth: 2.5,
+						tension: 0.2,
+						pointRadius: 0,
+					},
+					{
+						label: 'WTI spot',
+						data: spot,
+						yAxisID: 'yR',
+						borderColor: c.warmFaint,
+						borderWidth: 1.25,
+						tension: 0.2,
+						pointRadius: 0,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				// Draw immediately: an entry animation adds nothing to a reference chart,
+				// and it means the chart is never blank while off-screen or reduced-motion.
+				animation: false,
+				layout: { padding: { top: 20, right: 6 } },
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							label: (x) =>
+								`${x.dataset.label}: ` +
+								(x.dataset.yAxisID === 'yL'
+									? `${x.parsed.y.toFixed(1)}M bbl`
+									: `$${x.parsed.y.toFixed(0)}`),
+						},
+					},
+				},
+				scales: {
+					yL: {
+						position: 'left',
+						min: 150,
+						max: 760,
+						title: {
+							display: true,
+							text: 'Strategic reserve (million barrels)',
+							color: c.teal,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: 11 },
+							callback: (v) => `${v}M`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+					yR: {
+						position: 'right',
+						min: 50,
+						max: 110,
+						title: {
+							display: true,
+							text: 'WTI ($ / barrel)',
+							color: c.warm,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: 11 },
+							callback: (v) => `$${v}`,
+						},
+						grid: { display: false },
+						border: { display: false },
+					},
+					x: {
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: 11 },
+							autoSkip: false,
+							maxRotation: 0,
+							callback: (_v, i) => (i % 2 === 0 ? labels[i] : ''),
+						},
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	/*
+	  The theme toggle writes data-theme during load, which can land mid-init and
+	  race Chart.js. Debounce so we always settle on one build of the chart.
+	*/
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[SprChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+</script>
