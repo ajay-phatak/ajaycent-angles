@@ -68,6 +68,9 @@
 	@media (max-width: 720px) {
 		.chart-canvas { height: 300px; }
 	}
+	@media (max-width: 560px) {
+		.chart-canvas { height: 340px; }
+	}
 </style>
 
 <script>
@@ -79,10 +82,13 @@
 	const allRenewables = [20, 22, 21, 22.7, 26, 30];
 	const SPLIT = 3.5; // January 2025 handover, between the 2024 and 2025 points
 
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
 	function render() {
 		const canvas = document.getElementById('clean-energy-chart');
 		if (!canvas) return;
 		const c = palette();
+		const narrow = NARROW();
 		Chart.getChart(canvas)?.destroy();
 
 		const divider = {
@@ -100,13 +106,13 @@
 				ctx.lineTo(x, a.bottom);
 				ctx.stroke();
 				ctx.setLineDash([]);
-				ctx.font = `italic 11px ${c.serif}`;
+				ctx.font = `italic ${narrow ? 10 : 11}px ${c.serif}`;
 				ctx.fillStyle = c.inkSoft;
 				ctx.textBaseline = 'top';
 				ctx.textAlign = 'right';
-				ctx.fillText('Biden administration', x - 8, a.top + 2);
+				ctx.fillText(narrow ? 'Biden' : 'Biden administration', x - 8, a.top + 2);
 				ctx.textAlign = 'left';
-				ctx.fillText('Trump administration', x + 8, a.top + 2);
+				ctx.fillText(narrow ? 'Trump' : 'Trump administration', x + 8, a.top + 2);
 				ctx.restore();
 			},
 		};
@@ -168,14 +174,14 @@
 						min: 0,
 						max: 34,
 						title: {
-							display: true,
+							display: !narrow,
 							text: 'Share of U.S. electricity generation',
 							color: c.inkSoft,
 							font: { family: c.serif, size: 12 },
 						},
 						ticks: {
 							color: c.inkSoft,
-							font: { family: c.serif, size: 11 },
+							font: { family: c.serif, size: narrow ? 10 : 11 },
 							stepSize: 5,
 							callback: (v) => `${v}%`,
 						},
@@ -183,7 +189,7 @@
 						border: { display: false },
 					},
 					x: {
-						ticks: { color: c.inkSoft, font: { family: c.serif, size: 12 } },
+						ticks: { color: c.inkSoft, font: { family: c.serif, size: narrow ? 10 : 12 } },
 						grid: { display: false },
 						border: { color: c.rule },
 					},
@@ -215,4 +221,5 @@
 		scheduleRender();
 	}
 	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
 </script>

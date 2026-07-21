@@ -105,6 +105,9 @@
 	@media (max-width: 720px) {
 		.chart-canvas { height: 320px; }
 	}
+	@media (max-width: 560px) {
+		.chart-canvas { height: 380px; }
+	}
 </style>
 
 <script>
@@ -141,10 +144,10 @@
 	const PEAK = 415.4;
 
 	const thresholds = [
-		{ y: 727, label: 'All-time high · 727M', key: false },
-		{ y: PEAK, label: 'Pre-war peak · 415M', key: false },
-		{ y: FLOOR, label: 'Statutory drawdown floor · 252M', key: true },
-		{ y: 180, label: 'IEA 90-day minimum · 180M', key: false },
+		{ y: 727, label: 'All-time high · 727M', short: '727M all-time high', shortest: '727M high', key: false },
+		{ y: PEAK, label: 'Pre-war peak · 415M', short: '415M pre-war peak', shortest: '415M peak', key: false },
+		{ y: FLOOR, label: 'Statutory drawdown floor · 252M', short: '252M statutory floor', shortest: '252M floor', key: true },
+		{ y: 180, label: 'IEA 90-day minimum · 180M', short: '180M IEA minimum', shortest: '180M IEA', key: false },
 	];
 	const events = [
 		{ x: 5, n: '1' },
@@ -153,10 +156,31 @@
 		{ x: 15.25, n: '4' },
 	];
 
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	// Stagger event bubbles that land too close together in x (only relevant
+	// at narrow widths, where the plot area is a few hundred pixels wide).
+	function computeEventRows(ch) {
+		const { scales } = ch;
+		let prevX = null;
+		let prevRow = 0;
+		let maxRow = 0;
+		const rows = events.map((e) => {
+			const x = scales.x.getPixelForValue(e.x);
+			const row = prevX !== null && Math.abs(x - prevX) < 22 ? prevRow + 1 : 0;
+			prevX = x;
+			prevRow = row;
+			maxRow = Math.max(maxRow, row);
+			return row;
+		});
+		return { rows, maxRow };
+	}
+
 	function render() {
 		const canvas = document.getElementById('spr-chart');
 		if (!canvas) return;
 		const c = palette();
+		const narrow = NARROW();
 		Chart.getChart(canvas)?.destroy();
 
 		const overlay = {
@@ -174,6 +198,15 @@
 				const { ctx, chartArea: a, scales } = ch;
 				if (!a) return;
 				ctx.save();
+
+				const bubbleR = narrow ? 7 : 8;
+				const numFont = narrow ? 9 : 10;
+				const rows = narrow ? computeEventRows(ch).rows : events.map(() => 0);
+				const bubbles = events.map((e, i) => ({
+					x: scales.x.getPixelForValue(e.x),
+					cy: narrow ? a.top + 6 + rows[i] * 19 : a.top + 6,
+				}));
+
 				thresholds.forEach((t) => {
 					const y = scales.yL.getPixelForValue(t.y);
 					ctx.setLineDash([5, 4]);
@@ -184,41 +217,77 @@
 					ctx.lineTo(a.right, y);
 					ctx.stroke();
 					ctx.setLineDash([]);
-					ctx.font = `italic ${t.key ? 11 : 10.5}px ${c.serif}`;
+
+					let text = t.label;
+					const fontSize = narrow ? (t.key ? 9.5 : 9) : t.key ? 11 : 10.5;
+					ctx.font = `italic ${fontSize}px ${c.serif}`;
+					if (narrow) {
+						text = t.short;
+						const maxWidth = a.right - a.left - 14;
+						if (ctx.measureText(text).width > maxWidth) {
+							text = t.shortest;
+						}
+					}
 					ctx.fillStyle = t.key ? c.teal : c.inkSoft;
 					ctx.textAlign = 'left';
-					ctx.textBaseline = 'bottom';
-					ctx.fillText(t.label, a.left + 7, y - 3);
+
+					/*
+					  Labels normally sit above their line, but the topmost one runs
+					  under the event bubbles once the plot narrows. Drop just the
+					  colliding label below its line rather than shifting them all —
+					  below-the-line is worse everywhere else, where the label would
+					  then cross the series it annotates.
+					*/
+					const x0 = a.left + 7;
+					const x1 = x0 + ctx.measureText(text).width;
+					const hits =
+						narrow &&
+						bubbles.some(
+							(b) =>
+								b.x + bubbleR > x0 &&
+								b.x - bubbleR < x1 &&
+								b.cy + bubbleR > y - 3 - fontSize &&
+								b.cy - bubbleR < y - 3,
+						);
+					if (hits) {
+						ctx.textBaseline = 'top';
+						ctx.fillText(text, x0, y + 3);
+					} else {
+						ctx.textBaseline = 'bottom';
+						ctx.fillText(text, x0, y - 3);
+					}
 				});
-				events.forEach((e) => {
-					const x = scales.x.getPixelForValue(e.x);
+
+				events.forEach((e, i) => {
+					const { x, cy } = bubbles[i];
+					const connectorTop = narrow ? cy + bubbleR + 2 : a.top + 13;
 					ctx.setLineDash([3, 4]);
 					ctx.lineWidth = 1;
 					ctx.strokeStyle = c.inkSoft;
 					ctx.beginPath();
-					ctx.moveTo(x, a.top + 13);
+					ctx.moveTo(x, connectorTop);
 					ctx.lineTo(x, a.bottom);
 					ctx.stroke();
 					ctx.setLineDash([]);
 					ctx.beginPath();
-					ctx.arc(x, a.top + 6, 8, 0, Math.PI * 2);
+					ctx.arc(x, cy, bubbleR, 0, Math.PI * 2);
 					ctx.fillStyle = c.bg;
 					ctx.fill();
 					ctx.lineWidth = 1.25;
 					ctx.strokeStyle = c.inkSoft;
 					ctx.stroke();
-					ctx.font = `500 10px ${c.serif}`;
+					ctx.font = `500 ${numFont}px ${c.serif}`;
 					ctx.fillStyle = c.ink;
 					ctx.textAlign = 'center';
 					ctx.textBaseline = 'middle';
-					ctx.fillText(e.n, x, a.top + 6.5);
+					ctx.fillText(e.n, x, cy + 0.5);
 				});
 				ctx.restore();
 			},
 			afterDatasetsDraw(ch) {
 				const { ctx, scales } = ch;
 				ctx.save();
-				ctx.font = `500 11px ${c.serif}`;
+				ctx.font = `500 ${narrow ? 10 : 11}px ${c.serif}`;
 				ctx.fillStyle = c.teal;
 				ctx.textAlign = 'right';
 				ctx.textBaseline = 'top';
@@ -231,7 +300,7 @@
 			},
 		};
 
-		new Chart(canvas, {
+		const chart = new Chart(canvas, {
 			type: 'line',
 			data: {
 				labels,
@@ -275,7 +344,9 @@
 				// Draw immediately: an entry animation adds nothing to a reference chart,
 				// and it means the chart is never blank while off-screen or reduced-motion.
 				animation: false,
-				layout: { padding: { top: 20, right: 6 } },
+				// Narrow guess covers the worst case (3 clustered events staggered
+				// to 2 extra rows); adjusted down after layout if not needed.
+				layout: { padding: { top: narrow ? 58 : 20, right: 6 } },
 				interaction: { mode: 'index', intersect: false },
 				plugins: {
 					legend: { display: false },
@@ -302,14 +373,14 @@
 						min: 150,
 						max: 760,
 						title: {
-							display: true,
+							display: !narrow,
 							text: 'Strategic reserve (million barrels)',
 							color: c.teal,
 							font: { family: c.serif, size: 12 },
 						},
 						ticks: {
 							color: c.inkSoft,
-							font: { family: c.serif, size: 11 },
+							font: { family: c.serif, size: narrow ? 10 : 11 },
 							callback: (v) => `${v}M`,
 						},
 						grid: { color: c.rule, drawTicks: false },
@@ -320,14 +391,14 @@
 						min: 50,
 						max: 110,
 						title: {
-							display: true,
+							display: !narrow,
 							text: 'WTI ($ / barrel)',
 							color: c.warm,
 							font: { family: c.serif, size: 12 },
 						},
 						ticks: {
 							color: c.inkSoft,
-							font: { family: c.serif, size: 11 },
+							font: { family: c.serif, size: narrow ? 10 : 11 },
 							callback: (v) => `$${v}`,
 						},
 						grid: { display: false },
@@ -336,10 +407,11 @@
 					x: {
 						ticks: {
 							color: c.inkSoft,
-							font: { family: c.serif, size: 11 },
+							font: { family: c.serif, size: narrow ? 10 : 11 },
 							autoSkip: false,
 							maxRotation: 0,
-							callback: (_v, i) => (i % 2 === 0 ? labels[i] : ''),
+							callback: (_v, i) =>
+								narrow ? ([0, 6, 12, 18].includes(i) ? labels[i] : '') : i % 2 === 0 ? labels[i] : '',
 						},
 						grid: { display: false },
 						border: { color: c.rule },
@@ -348,6 +420,15 @@
 			},
 			plugins: [overlay],
 		});
+
+		if (narrow) {
+			const { maxRow } = computeEventRows(chart);
+			const neededTop = 20 + 19 * maxRow;
+			if (neededTop !== chart.options.layout.padding.top) {
+				chart.options.layout.padding.top = neededTop;
+				chart.update('none');
+			}
+		}
 	}
 
 	/*
@@ -372,4 +453,5 @@
 		scheduleRender();
 	}
 	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
 </script>
