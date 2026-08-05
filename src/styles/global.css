@@ -99,6 +99,33 @@ blockquote {
 }
 hr { border: none; border-top: 1px solid var(--rule); }
 
+/*
+  Dated correction inside a published post. Borrows the blockquote's accent bar,
+  which is what makes it read as a separate object rather than a stray paragraph,
+  but not its pull-quote type — italic at 1.15em outshouts the piece it amends.
+  The bar and kicker do the separating; the type recedes.
+*/
+.post-update {
+	display: block;
+	margin: 2.2em 0;
+	padding: 0.15em 0 0.15em 20px;
+	border-left: 3px solid var(--accent);
+	font-size: 0.88em;
+	line-height: 1.65;
+	color: var(--ink-soft);
+}
+.post-update .label {
+	display: block;
+	margin-bottom: 0.35em;
+	font-family: var(--font-serif);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.post-update strong { font-weight: 600; color: var(--ink); }
+
 /* shared UI: buttons, kicker labels, cards, ad slots */
 .kicker {
 	font-size: 0.8rem;
