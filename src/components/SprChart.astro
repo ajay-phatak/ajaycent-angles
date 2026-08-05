@@ -14,11 +14,11 @@
 		<canvas
 			id="spr-chart"
 			role="img"
-			aria-label="The U.S. Strategic Petroleum Reserve against WTI oil prices from January 2025 to July 2026. The reserve refills to a peak of 415 million barrels in early March 2026, then falls to 307.7 million by late July. WTI spot peaks above $102 in May 2026 while 12-month futures never exceed $76, a backwardation of more than $26."
+			aria-label="The U.S. Strategic Petroleum Reserve against WTI oil prices from January 2025 to July 2026. The reserve refills to a peak of 415 million barrels in early March 2026, then falls to 304.8 million by the end of July. WTI spot peaks above $102 in May 2026 while 12-month futures never exceed $76, a backwardation of more than $26."
 		>
-			The SPR fell from 415 million barrels to 307.7 million between March and late July 2026,
-			consuming about 66% of the reserve usable above the statutory floor. WTI spot peaked
-			at $102 while 12-month futures stayed below $76.
+			The SPR fell from 415 million barrels to 304.8 million between March and the end of
+			July 2026, consuming about 68% of the reserve usable above the statutory floor. WTI
+			spot peaked at $102 while 12-month futures stayed below $76.
 		</canvas>
 	</div>
 
@@ -33,11 +33,9 @@
 		Reserve levels and WTI spot: U.S. Energy Information Administration (weekly SPR stocks;
 		Cushing WTI monthly average). Futures: NYMEX settlement for the contract expiring twelve
 		months after each observation month — contracts dated before August 2025 have expired and
-		are no longer published, so that series begins there. The July 2026 reserve level is the
-		week ending July 24, the most recent EIA has published; July spot averages EIA's weekly
-		Cushing quotes with the closing week estimated from NYMEX front-month settlements, since
-		EIA does not close the month until August 5. Statutory floor of 252.4M barrels per
-		42 U.S.C. §6241.
+		are no longer published, so that series begins there. Monthly reserve points are the first
+		weekly reading of each month; the final point is the week ending July 31, 2026. Statutory
+		floor of 252.4M barrels per 42 U.S.C. §6241.
 	</figcaption>
 </figure>
 
@@ -122,26 +120,23 @@
 		"Jan '26", 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 	];
 	/*
-	  Each month is the first EIA weekly stock reading of that month. July 2026 is
-	  the week ending Jul 24, the last one published — the Jul 31 reading lands
-	  with the Aug 5 status report.
+	  Each month is the first EIA weekly stock reading of that month. The last
+	  point is the exception: it is the week ending Jul 31, 2026, so the series
+	  ends where the data does rather than a month short.
 	*/
 	const spr = [
 		393.8, 395.3, 395.6, 396.7, 399.1, 402.1, 403.0, 403.0, 405.2, 407.0, 410.4, 411.9,
-		413.5, 415.2, 415.4, 413.3, 392.7, 349.2, 307.7,
+		413.5, 415.2, 415.4, 413.3, 392.7, 349.2, 304.8,
 	];
 	/*
-	  Spot: EIA Cushing WTI monthly average (RWTCm). July 2026 is a day-weighted
-	  mean of EIA's weekly Cushing quotes through Jul 24 plus the closing week
-	  estimated from NYMEX front-month settlements (which have tracked ~$1.10
-	  under the EIA weekly all month), since EIA closes the month on Aug 5.
+	  Spot: EIA Cushing WTI monthly average (RWTCm).
 	  Futures: NYMEX settlement for the contract expiring 12 months after each
 	  observation month. Contracts dated before Aug 2025 have expired and are no
 	  longer retrievable, so the forward series starts there.
 	*/
 	const spot = [
 		75.7, 71.5, 68.2, 63.5, 62.2, 68.2, 68.4, 64.9, 64.0, 60.9, 60.1, 58.0,
-		60.0, 64.5, 91.4, 100.3, 102.1, 84.8, 80.4,
+		60.0, 64.5, 91.4, 100.3, 102.1, 84.8, 80.5,
 	];
 	const futures = [
 		null, null, null, null, null, null, null, 61.8, 62.0, 59.5, 59.1, 57.5,
