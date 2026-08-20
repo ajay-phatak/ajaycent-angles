@@ -1,0 +1,290 @@
+---
+// Decomposition of each year's borrowing, FY1993 – FY2026: interest, tax cuts,
+// wars, and crisis response stacked against what the rest of government ran.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch sw-interest"></i>Interest on the debt</span>
+		<span><i class="swatch sw-tax"></i>Tax cuts (vs. pre-2001 law, est.)</span>
+		<span><i class="swatch sw-wars"></i>Wars (est.)</span>
+		<span><i class="swatch sw-crisis"></i>Crisis response (est.)</span>
+		<span><i class="swatch sw-rest"></i>Everything else, net</span>
+		<span><i class="swatch line-ink"></i>Actual deficit</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="debt-drivers-chart"
+			role="img"
+			aria-label="Each fiscal year's federal borrowing from 1993 through 2026, decomposed into interest on the debt, tax-cut revenue losses, war spending, and crisis response, stacked against the net balance of everything else the government does. In most years the everything-else bar sits below zero — a surplus — while interest, tax cuts, wars, and crises account for the entire deficit. Interest alone grows from roughly $300 billion in the 1990s to a $1.4 trillion pace in 2026."
+		>
+			Decomposing each year's borrowing: interest, tax cuts, wars, and crisis response
+			account for the entire deficit in most years, while the rest of government runs
+			at or near surplus. Interest alone grew from roughly $300 billion a year in the
+			1990s to a $1.4 trillion pace in 2026.
+		</canvas>
+	</div>
+
+	<figcaption>
+		Interest: U.S. Treasury interest-expense records (gross interest on all federal debt;
+		FY 1993–2009 from Treasury's historical tables, FY 2026 annualized from ten months of
+		data). Tax cuts: estimated annual revenue effect of the 2001/2003 cuts and extensions,
+		the 2017 Tax Cuts and Jobs Act, and the 2025 extension, relative to pre-2001 law,
+		from CBO/JCT scores. Wars: direct war and overseas-contingency appropriations;
+		FY 2026 war costs are not yet published and land in "everything else." Crisis
+		response: the 2008–2011 and 2020–2022 packages, by year of outlay. "Everything else"
+		is the remainder against the official OMB deficit (line): below zero means the rest
+		of government ran a surplus that year. All non-interest categories are estimates —
+		exact attributions vary by scorer; the shape, not the decimals, is the point.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		height: 11px;
+		flex-shrink: 0;
+	}
+	.sw-interest { background: rgba(90, 95, 110, 0.75); }
+	.sw-tax { background: rgba(176, 97, 53, 0.8); }
+	.sw-wars { background: rgba(140, 52, 42, 0.8); }
+	.sw-crisis { background: rgba(0, 114, 126, 0.7); }
+	.sw-rest { background: rgba(120, 130, 160, 0.28); }
+	.line-ink { height: 3px; background: var(--ink); }
+	:global([data-theme='dark']) .sw-interest { background: rgba(165, 169, 183, 0.7); }
+	:global([data-theme='dark']) .sw-tax { background: rgba(217, 143, 99, 0.8); }
+	:global([data-theme='dark']) .sw-wars { background: rgba(200, 90, 78, 0.8); }
+	:global([data-theme='dark']) .sw-crisis { background: rgba(77, 189, 202, 0.7); }
+	:global([data-theme='dark']) .sw-rest { background: rgba(150, 160, 190, 0.3); }
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 420px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 360px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	const years = [];
+	for (let y = 1993; y <= 2026; y++) years.push(y);
+
+	/* Official OMB deficit (FRED FYFSD), $B; FY2026 = 10.5-month debt-held-by-
+	   public change annualized. */
+	const deficit = [
+		255, 203, 164, 107, 22, -69, -126, -236, -128, 158, 378, 413, 318, 248, 161, 459,
+		1413, 1294, 1300, 1077, 680, 485, 442, 585, 665, 779, 984, 3096, 2774, 1374, 1687,
+		1815, 1775, 2270,
+	];
+	/* Gross interest: Treasury historical tables (1993–2009), fiscaldata
+	   interest-expense API (2010–2025), FY2026 annualized from Oct–Jul. */
+	const interest = [
+		293, 296, 332, 344, 356, 364, 354, 362, 360, 333, 318, 322, 352, 406, 430, 451, 383,
+		414, 454, 360, 416, 431, 402, 433, 459, 523, 575, 523, 562, 719, 883, 1133, 1220, 1400,
+	];
+	/* Estimated annual revenue loss vs pre-2001 law: Bush cuts + extensions,
+	   then TCJA stacked on the permanent Bush portions, then OBBBA. */
+	const taxCuts = [
+		0, 0, 0, 0, 0, 0, 0, 0, 75, 160, 220, 270, 240, 260, 280, 300, 330, 350, 370, 370,
+		330, 350, 370, 390, 400, 600, 620, 500, 600, 650, 670, 690, 700, 900,
+	];
+	/* Direct war / OCO appropriations. FY2026 not yet published — in residual. */
+	const wars = [
+		0, 0, 0, 0, 0, 0, 0, 0, 14, 21, 81, 94, 107, 121, 170, 187, 153, 162, 159, 127, 93,
+		85, 74, 73, 83, 78, 72, 71, 69, 40, 30, 30, 30, 0,
+	];
+	/* 2008 rebates + TARP/ARRA outlay years; CARES/response + ARP outlay years. */
+	const crisis = [
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120, 640, 400, 150, 0, 0, 0, 0, 0, 0,
+		0, 0, 2600, 1900, 350, 0, 0, 0, 0,
+	];
+	const rest = deficit.map((d, i) => d - interest[i] - taxCuts[i] - wars[i] - crisis[i]);
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function layerColors(dark) {
+		return {
+			interest: dark ? 'rgba(165, 169, 183, 0.7)' : 'rgba(90, 95, 110, 0.75)',
+			tax: dark ? 'rgba(217, 143, 99, 0.8)' : 'rgba(176, 97, 53, 0.8)',
+			wars: dark ? 'rgba(200, 90, 78, 0.8)' : 'rgba(140, 52, 42, 0.8)',
+			crisis: dark ? 'rgba(77, 189, 202, 0.7)' : 'rgba(0, 114, 126, 0.7)',
+			rest: dark ? 'rgba(150, 160, 190, 0.3)' : 'rgba(120, 130, 160, 0.28)',
+		};
+	}
+
+	function render() {
+		const canvas = document.getElementById('debt-drivers-chart');
+		if (!canvas) return;
+		const c = palette();
+		const cols = layerColors(c.dark);
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'driversOverlay',
+			afterDatasetsDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				ctx.save();
+				ctx.font = `italic ${narrow ? 9 : 10.5}px ${c.serif}`;
+				ctx.fillStyle = c.inkSoft;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'bottom';
+				ctx.fillText(
+					narrow ? 'below 0 = rest runs a surplus' : 'bars below zero: the rest of government ran a surplus',
+					(a.left + a.right) / 2,
+					a.bottom - 6,
+				);
+				ctx.restore();
+			},
+		};
+
+		const bar = (label, data, color) => ({
+			type: 'bar',
+			label,
+			data: data.map((v) => v / 1000),
+			backgroundColor: color,
+			stack: 's',
+			categoryPercentage: 0.92,
+			barPercentage: 0.92,
+		});
+
+		new Chart(canvas, {
+			data: {
+				labels: years,
+				datasets: [
+					bar('Interest on the debt', interest, cols.interest),
+					bar('Tax cuts (est.)', taxCuts, cols.tax),
+					bar('Wars (est.)', wars, cols.wars),
+					bar('Crisis response (est.)', crisis, cols.crisis),
+					bar('Everything else, net', rest, cols.rest),
+					{
+						type: 'line',
+						label: 'Actual deficit',
+						data: deficit.map((v) => v / 1000),
+						borderColor: c.ink,
+						borderWidth: 1.75,
+						pointRadius: 0,
+						pointHitRadius: 6,
+						tension: 0.2,
+						stepped: false,
+						stack: 'line',
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 8, right: 6 } },
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => 'FY ' + items[0].label + (+items[0].label === 2026 ? ' (est.)' : ''),
+							label: (x) => `${x.dataset.label}: $${(x.parsed.y * 1000).toFixed(0)}B`,
+						},
+					},
+				},
+				scales: {
+					y: {
+						stacked: true,
+						min: -1,
+						max: 4,
+						title: {
+							display: !narrow,
+							text: 'Borrowing per year ($ trillion)',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 0.5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => `$${v}T`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+					x: {
+						stacked: true,
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							autoSkip: false,
+							maxRotation: 0,
+							callback: (_v, i) => {
+								const step = narrow ? 8 : 4;
+								return (years[i] - 1993) % step === 0 ? years[i] : '';
+							},
+						},
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[DebtDriversChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

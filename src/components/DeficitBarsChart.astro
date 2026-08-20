@@ -1,0 +1,302 @@
+---
+// Annual federal deficit by fiscal year, FY1993 – FY2026, bars colored by the
+// party of the president whose administration set that year's budget.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch bar-blue"></i>Democratic president</span>
+		<span><i class="swatch bar-red"></i>Republican president</span>
+		<span><i class="swatch line-warm"></i>Deficit as % of GDP</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="deficit-bars-chart"
+			role="img"
+			aria-label="Annual federal deficits from fiscal year 1993 through 2026, colored by the party of the president in office for most of each fiscal year. Deficits shrink through the 1990s into four straight surpluses from 1998 to 2001, grow again through the 2000s, spike to $1.4 trillion in the 2009 financial crisis and $3.1 trillion in the 2020 pandemic, and never return below $1.3 trillion afterward. Within each stretch, deficits trend downward under Democratic presidents after the crisis spikes they inherit, and upward under Republican presidents. Fiscal 2026 has already borrowed $2.0 trillion in ten and a half months, more than all of fiscal 2025."
+		>
+			Annual deficits fell to four straight surpluses in 1998–2001, spiked to $1.4T in
+			2009 and $3.1T in 2020, and reached $2.0T in the first ten and a half months of
+			fiscal 2026 — more than all of fiscal 2025.
+		</canvas>
+	</div>
+
+	<figcaption>
+		Deficits: OMB historical series via FRED (FYFSD, FYFSGDA188S), through FY 2025. Bars
+		above the line are deficits; bars below are surpluses. Each year is colored by the
+		party of the president in office for most of that fiscal year — eight of its twelve
+		months — so a transition year like FY 2009 or FY 2021 belongs to the incoming
+		president, crisis inheritance and all. The FY 2026 bar is partial: the change in
+		debt held by the public from October 1, 2025 through August 18, 2026, a close proxy
+		for the deficit; its percent-of-GDP point is that pace annualized.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.bar-blue { height: 11px; background: rgba(63, 94, 190, 0.55); }
+	.bar-red { height: 11px; background: rgba(196, 60, 48, 0.55); }
+	.line-warm { height: 3px; background: #b06135; }
+	:global([data-theme='dark']) .bar-blue { background: rgba(110, 140, 235, 0.6); }
+	:global([data-theme='dark']) .bar-red { background: rgba(235, 110, 100, 0.6); }
+	:global([data-theme='dark']) .line-warm { background: #d98f63; }
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 400px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 340px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	/*
+	  OMB deficits via FRED FYFSD ($B, deficit positive here). FY2026 is the
+	  change in debt held by the public Oct 1 2025 → Aug 18 2026 — a deficit
+	  proxy covering 10.5 of 12 months.
+	*/
+	const years = [];
+	for (let y = 1993; y <= 2026; y++) years.push(y);
+	const deficit = [
+		255, 203, 164, 107, 22, -69, -126, -236, -128, 158, 378, 413, 318, 248, 161, 459,
+		1413, 1294, 1300, 1077, 680, 485, 442, 585, 665, 779, 984, 3096, 2774, 1374, 1687,
+		1815, 1775, 1990,
+	];
+	/* FRED FYFSGDA188S, deficit positive. FY2026 point is the YTD pace annualized. */
+	const pctGdp = [
+		3.7, 2.8, 2.1, 1.3, 0.3, -0.8, -1.3, -2.3, -1.2, 1.4, 3.3, 3.4, 2.4, 1.8, 1.1, 3.1,
+		9.8, 8.6, 8.3, 6.6, 4.0, 2.8, 2.4, 3.1, 3.4, 3.8, 4.6, 14.5, 11.7, 5.3, 6.1, 6.2,
+		5.8, 7.0,
+	];
+	/* Majority-month attribution: the president in office for eight of the
+	   fiscal year's twelve months (February through September). */
+	const party = years.map((y) => {
+		if (y <= 2000) return 'd';
+		if (y <= 2008) return 'r';
+		if (y <= 2016) return 'd';
+		if (y <= 2020) return 'r';
+		if (y <= 2024) return 'd';
+		return 'r';
+	});
+	const LAST = years.length - 1;
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function partyFill(dark) {
+		return {
+			d: dark ? 'rgba(110, 140, 235, 0.6)' : 'rgba(63, 94, 190, 0.55)',
+			r: dark ? 'rgba(235, 110, 100, 0.6)' : 'rgba(196, 60, 48, 0.55)',
+			dEdge: dark ? '#8fa3d9' : '#4a5f9e',
+			rEdge: dark ? '#d99a8f' : '#a2544a',
+		};
+	}
+
+	function render() {
+		const canvas = document.getElementById('deficit-bars-chart');
+		if (!canvas) return;
+		const c = palette();
+		const fills = partyFill(c.dark);
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'deficitOverlay',
+			afterDatasetsDraw(ch) {
+				const { ctx, scales } = ch;
+				ctx.save();
+				ctx.font = `italic ${narrow ? 9 : 10.5}px ${c.serif}`;
+				ctx.fillStyle = c.inkSoft;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'top';
+				// Surplus years annotation, centered under the 1998–2001 dip
+				const xs = scales.x.getPixelForValue(6.5);
+				ctx.fillText('4 straight surpluses', xs, scales.yL.getPixelForValue(-0.3));
+
+				// Partial-year note on the FY2026 bar
+				ctx.font = `500 ${narrow ? 9 : 10.5}px ${c.serif}`;
+				ctx.fillStyle = c.ink;
+				ctx.textAlign = 'right';
+				ctx.textBaseline = 'bottom';
+				ctx.fillText(
+					narrow ? '$2.0T · 10.5 mo' : '$2.0T in 10.5 months',
+					scales.x.getPixelForValue(LAST) + 8,
+					scales.yL.getPixelForValue(deficit[LAST] / 1000) - 4,
+				);
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			data: {
+				labels: years,
+				datasets: [
+					{
+						type: 'bar',
+						label: 'Deficit',
+						data: deficit.map((v) => v / 1000),
+						yAxisID: 'yL',
+						backgroundColor: party.map((p, i) =>
+							i === LAST ? fills[p].replace(/[\d.]+\)$/, '0.3)') : fills[p],
+						),
+						borderColor: party.map((p) => (p === 'd' ? fills.dEdge : fills.rEdge)),
+						borderWidth: party.map((_p, i) => (i === LAST ? 1.5 : 0)),
+						borderDash: [4, 3],
+						categoryPercentage: 0.92,
+						barPercentage: 0.92,
+					},
+					{
+						type: 'line',
+						label: 'Deficit as % of GDP',
+						data: pctGdp,
+						yAxisID: 'yR',
+						borderColor: c.warm,
+						borderWidth: 2,
+						tension: 0.25,
+						pointRadius: (ctx) => (ctx.dataIndex === LAST ? 3.5 : 0),
+						pointBackgroundColor: c.bg,
+						pointBorderColor: c.warm,
+						pointBorderWidth: 1.5,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 8, right: 6 } },
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => 'FY ' + items[0].label + (+items[0].label === 2026 ? ' (partial)' : ''),
+							label: (x) =>
+								x.dataset.yAxisID === 'yL'
+									? (x.parsed.y < 0 ? 'Surplus: $' : 'Deficit: $') +
+										Math.abs(x.parsed.y * 1000).toFixed(0) + 'B'
+									: `% of GDP: ${x.parsed.y.toFixed(1)}%`,
+						},
+					},
+				},
+				scales: {
+					yL: {
+						position: 'left',
+						min: -0.5,
+						max: 3.5,
+						title: {
+							display: !narrow,
+							text: 'Deficit ($ trillion)',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 0.5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => `$${v}T`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+					yR: {
+						position: 'right',
+						min: -2.5,
+						max: 17.5,
+						title: {
+							display: !narrow,
+							text: 'Deficit as % of GDP',
+							color: c.warm,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 2.5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => (v % 5 === 0 ? `${v}%` : ''),
+						},
+						grid: { display: false },
+						border: { display: false },
+					},
+					x: {
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							autoSkip: false,
+							maxRotation: 0,
+							callback: (_v, i) => {
+								const step = narrow ? 8 : 4;
+								return (years[i] - 1993) % step === 0 ? years[i] : '';
+							},
+						},
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[DeficitBarsChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

@@ -1,0 +1,87 @@
+---
+title: 'Fiscal Responsibility in America'
+description: 'The debt crossed $40 trillion this week. Before we argue about it, we need a sense of scale — because the things politicians yell about are rounding errors, and the things that actually moved the line barely get mentioned.'
+pubDate: 'Aug 20 2026'
+---
+
+import DebtChart from '../../components/DebtChart.astro';
+import DeficitBarsChart from '../../components/DeficitBarsChart.astro';
+import DebtDriversChart from '../../components/DebtDriversChart.astro';
+
+USAID, the agency whose elimination was sold as a major victory over government waste, cost about $40 billion a year. Sounds like a high number right? Well it's 0.6% of the federal budget. If your household budget were the federal budget, USAID was a streaming subscription. It was arguably one of the most efficient spends in terms of global stability and therefore national defense, but it's gone now in the name of 'fiscal responsibility', but in the scheme of things it was basically a rounding error.
+
+Our entire political conversation about spending runs on numbers that *sound* big. Millions, billions, and trillions all register in our human brains as "a lot," but they are not remotely the same thing. A million seconds is eleven days. A billion seconds is thirty-two years. A trillion seconds is longer than human civilization.
+
+So when DOGE spent a year announcing that it had found waste, fraud, and abuse (and what it actually found was a list of programs it politically disliked by the way, 0 waste fraud or abuse), even the *claimed* savings amounted to about two percent of one year's spending. The real, verified number was far smaller. That's less of a debt strategy and more of government theater performed in units they know the audience can't size-check.
+
+The things that actually built the $40 trillion we see today are enormous, and mostly undiscussed. Let's look at them.
+
+## The chart
+
+I built the chart I wanted to see: thirty-three years of the national debt, every presidency shaded by party, the major fiscal legislation pinned where it happened, and, more relevantly, the debt as a share of GDP on the second axis.
+
+<DebtChart />
+
+The dollar line always goes up. It went up under Clinton, and it'll go up under whoever's next, because the economy grows and the dollar inflates and a bigger economy carries more debt the way a bigger income carries a bigger mortgage. But the ratio tells a less symmetric story:
+
+| | Debt at start | Debt at end | Debt-to-GDP |
+|---|---|---|---|
+| Clinton (1993–2001) | $4.2T | $5.7T | 63% → 55% |
+| Bush (2001–2009) | $5.7T | $10.6T | 55% → 77% |
+| Obama (2009–2017) | $10.6T | $19.9T | 77% → 103% |
+| Trump (2017–2021) | $19.9T | $27.7T | 103% → 124% |
+| Biden (2021–2025) | $27.7T | $36.2T | 124% → 120% |
+| Trump (2025– ) | $36.2T | **$40.0T** | 120% → ~123% |
+
+The narrative says Republicans are the party of fiscal responsibility. The scoreboard says the ratio fell under exactly two presidents in thirty-three years, and both were Democrats.
+
+## Six for six
+
+The debt is the stock. The deficit is the flow — how much new borrowing happens each year. And when you lay the annual deficits out and color each fiscal year by the president who presided over it, a pattern shows up:
+
+<DeficitBarsChart />
+
+**Every blue stretch on this chart ends with a smaller deficit than it started with. Every red stretch ends with a bigger one. Six presidencies, six for six, no exceptions.**
+
+Clinton took a $255 billion deficit to four straight surpluses. Bush took a surplus to $459 billion, which is *before* his final budget handed off the financial crisis. Obama inherited a $1.4 trillion crisis-year deficit and walked it down to $585 billion. Trump took that to $3.1 trillion (deficits were rising every single year of his first term *before* COVID) from $665 billion to $984 billion, deficit spending through the strongest economy in decades. Biden inherited the $2.8 trillion pandemic deficit and cut it to $1.4 trillion before it drifted back to $1.8 trillion (despite passing more legislation than any previous president in a single term by the way). And the current administration has borrowed **$2.0 trillion in the first ten and a half months of fiscal 2026**: already more than all of fiscal 2025, with six weeks still on the clock.
+
+And note the coloring is *generous to the Republican side of the ledger*: each transition year goes to the incoming president, so Obama's row starts with the crisis deficit Bush's budget created, Biden's row starts with the pandemic borrowing, and Bush gets credited with the surplus year he inherited from Clinton. Stack the deck that way and the pattern still holds. The party with the fiscal-responsibility branding has never once, in this entire window, handed off a smaller deficit than it received. The party that allegedly can't stop spending has never once handed off a bigger one.
+
+## Not all red ink is the same
+
+How can that be true while the debt rose under everyone? Because deficit spending isn't one thing, and the two parties reach for it in different situations. There's a version that's justified (arguably mandatory), and a version that's just lighting the credit card on fire. You can tell them apart by asking one question: *what was the economy doing when we borrowed?*
+
+**Borrowing into a collapse is the justified kind.** The two vertical spikes on the deficit chart are 2009 and 2020, and I'm going to defend both of them. When the economy craters, workers are idle, factories are idle, and borrowing costs are at rock bottom. A dollar of government spending in that moment doesn't displace anything, it puts idle capacity back to work, and we expect to make it back plus more as growth. That's the whole point of the debt-to-GDP framing: spending that rescues the denominator can pay for part of itself. And sometimes *all* of itself: TARP, the most hated bailout in American history, was $700 billion authorized, and after repayments its net cost was on the order of $30 billion. The COVID response was messier and bigger: roughly four and a half trillion, but it bought the fastest labor-market recovery of my lifetime. Letting the economy die to keep a ratio pretty isn't fiscal responsibility; it's amputating the leg to save the shoe.
+
+**Borrowing into a boom is the other kind.** The 2001 and 2003 Bush tax cuts, the 2017 Tax Cuts and Jobs Act, and last year's One Big Beautiful Bill extending the 2017 rates for another decade all passed during expansions, all tilted toward the wealthy, all financed with debt. There is no idle capacity for this money to activate. The economy was already running. It's deficit spending at the exact moment the Clinton playbook says you're supposed to be *paying down*, and unlike a crisis package, which is a one-time spike that recedes, a tax cut is a permanent tilt in the floor. The Bush cuts and their extensions cost something like five trillion dollars. The 2017 cuts run about $1.9 trillion a decade, and the extension adds $3.4 trillion more. Nobody held a press conference about waste for any of it.
+
+**And then there are the wars,** which manage to be the worst of both: enormous, borrowed entirely, and with no economic denominator payoff at all. The post-9/11 wars ran around $8 trillion once you count the decades of veterans' care we owe. And right now we're financing the Iran war the same way. I wrote last month about [draining 61% of the usable Strategic Petroleum Reserve](/blog/state-of-the-iran-war) to keep the war's price off the pump, and the credit card is the same trick in a bigger font. That's a big part of how fiscal 2026's borrowing lapped fiscal 2025 with six weeks to spare.
+
+## Where the growth is actually coming from
+
+Take each year's borrowing and decompose it: interest on the existing debt, the revenue lost to the tax-cut stack, the wars, the crisis packages, and then whatever's left, which is everything else the federal government does. Social Security, Medicare, the military's regular budget, the national parks, the FBI, the weather satellites, and yes, USAID.
+
+<DebtDriversChart />
+
+The pale bars below the zero line are the punchline: in most years of the last three decades, **"everything else" ran a surplus.** Take away the interest, the tax cuts, the wars, and the crises, and the rest of the federal government (the part that gets yelled about on Fox) roughly pays for itself, and usually better than that. The deficit isn't a thousand little leaks that needs capital efficiency from a businessman, it's mostly four big pipes:
+
+1. **Interest on the debt itself.** Now the fastest-growing item in the budget, and the scariest, because it's the only one on full autopilot. Treasury's own ledger: gross interest was $575 billion in fiscal 2019. This year it's running at a **$1.4 trillion annual pace**. It has more than doubled in seven years. We now spend more servicing past borrowing than we spend on the entire active-duty military. Every point of debt-to-GDP we add gets charged rent, forever, and the rent went up.
+2. **The tax-cut stack.** Bush cuts plus extensions, TCJA, OBBBA. These are structural, permanent, compounding revenue loss, roughly ten trillion dollars of it across two decades. The orange band on the chart never recedes; it only steps up.
+3. **War.** Eight trillion and counting from the last generation of them, an unbudgeted new one running now.
+4. **Crisis response.** The 2008 and 2020 packages: the tallest single-year spikes, and the only category that came with an economic return.
+
+That's the whole story. If someone tells you they're serious about the debt and their plan doesn't touch this list, they are not serious about the debt. They're doing theater with the decimal rounding errors.
+
+And there's a revenue side of the ledger nobody performs outrage about: the same Congresses that cut taxes have spent years defunding the IRS. Every dollar of enforcement funding returns several dollars in taxes legally owed but not paid. Cutting it is the rare policy that *increases* the deficit while claiming to shrink government. If DOGE had been serious about found money, the single largest pile of it was sitting in the enforcement budget they helped gut.
+
+## Growth is the exit
+
+Here's the part I actually want to leave you with, because it's the hopeful part and it's also just the math.
+
+Nobody ever pays off a national debt the way you pay off a car. The $40 trillion will never be "paid back," and it doesn't need to be. Countries escape debt burdens by shrinking the *ratio*: growing the economy underneath the debt faster than the debt grows on top of it. That's how the postwar debt from WWII, proportionally bigger than today's, melted from 106% of GDP to under 30% by the 1970s without a single dramatic payoff. It's how Clinton's 63% became 55%. It's even how the COVID spike came down eight points in three years, though that time inflation did an ugly share of the growing and everyone rightfully hated it.
+
+Which means the real fiscal-responsibility test isn't "who spends less." It's "who borrows for things that grow the denominator." Stimulus in a crisis passes that test. Infrastructure and industrial policy at least attempt it. Tax cuts for people who were already going to be fine, in the middle of an expansion, fail it by construction, and a war fails it hardest of all.
+
+Six for six on the deficit chart isn't because Democrats are cheap, they demonstrably aren't. It's because "spend when it grows the economy, collect when it doesn't need you" is the entire job, and one party has been doing some version of it while the other has spent twenty-five years cutting the income side of the ledger and calling it discipline.
+
+$40 trillion is a real number and a real problem. But the first step to solving it is refusing to let anyone sell you a streaming subscription's worth of cuts as a plan while they put a war and a tax cut on the card.
