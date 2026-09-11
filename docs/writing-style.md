@@ -7,10 +7,10 @@ Every rule here is derived from an actual before/after, not from taste. Each
 carries the evidence and a confidence level. Rules with one observation behind
 them are marked as such — treat them as leads, not laws.
 
-**Evidence base as of Sept 11, 2026:** one full draft-vs-edit diff (Labor Day
-2026 Midterm Prediction), plus the published text of two earlier posts whose
-drafts predate the current record. That is thin. It will get better if every
-future draft is snapshotted before he edits — see *Keeping this current*.
+**Evidence base as of Sept 11, 2026:** one full draft-vs-edit comparison (Labor
+Day 2026 Midterm Prediction), plus the published text of two earlier posts whose
+drafts are no longer available. That is thin, and it grows one post at a time —
+see *Keeping this current*.
 
 ---
 
@@ -137,15 +137,21 @@ and let him tune it.
 
 ## Keeping this current
 
-The evidence base is one diff. To make it more than that:
+**Update this file at the end of the session that publishes a post, before the
+draft leaves context.** That is the only moment both versions exist — the draft
+as written and the note as Ajay edited it. He does not want duplicate copies of
+posts kept in the vault, so nothing is archived for later comparison and the
+differences are genuinely lost once the session ends. One post at a time, while
+it is fresh, is the whole mechanism.
 
-1. When drafting, save a snapshot of the draft as `<note name>.draft.md` in the
-   vault next to the note, before he edits.
-2. After he's edited, diff them: `diff "<name>.draft.md" "<name>.md"`.
-3. Add anything that recurs. **Raise confidence when a rule is observed twice;
-   delete it if a later post contradicts it.**
+When updating:
 
-Do not add rules from a single post without labelling them as such, and do not
-add rules inferred from his published prose alone — published text shows what he
-writes, not what he'd change about someone else's draft. Those are different
-things, and only the second one is what this file is for.
+- **Raise a rule's confidence when a second post confirms it.** Most rules here
+  rest on a single observation and say so.
+- **Delete a rule the moment a later post contradicts it.** A stale rule is
+  worse than a missing one, because it will actively steer the next draft wrong.
+- **Label anything new as single-observation** until it recurs.
+
+Do not add rules inferred from his published prose alone. Published text shows
+what he writes; this file is for what he *changes about a draft*. Those are
+different things, and only the second one makes the next draft better.
