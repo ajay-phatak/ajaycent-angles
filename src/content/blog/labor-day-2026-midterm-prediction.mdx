@@ -1,0 +1,137 @@
+---
+title: 'Labor Day 2026 Midterm Prediction'
+description: Polls, betting markets, and a Lichtman-style keys model all get pointed at the same midterm. Two of them agree on the Senate down to the seat. On the House they're ten seats apart, and the third one returns an answer that's physically impossible.
+pubDate: 'Sep 10 2026'
+---
+
+import SenatePollsVsMarketsChart from '../../components/SenatePollsVsMarketsChart.astro';
+import SenateSeatDistributionChart from '../../components/SenateSeatDistributionChart.astro';
+
+Typically, in election cycles, Labor Day marks the last stretch of the campaigns, so with the 2026 midterms coming up fast, I figured now would be a good time to take a snapshot of where things stand, and run some numbers on what I predict the results to be (assuming nothing crazy happens in the next 2 months).
+
+In this blogpost, I'm presenting 3 ways to model the election. Two of them land on the Senate in the same place, down to the individual seat. On the House they're ten seats apart. And the third one returns an answer that cannot happen.
+
+Everything below is pulled live from the [2026 Election Tracker](https://elections.ajaycent.com), which I plan to update as the race continues to unfold.
+
+## The State of Congress before the Race
+
+The Senate is 53–47. Thirty-five seats are up: the regularly scheduled seats plus special elections in Ohio and Florida for the two appointed senators. Democrats are defending 13 of those, Republicans 22.
+
+In the end, Vance as VP breaks ties, so 50 isn't enough, Democrats need 51.
+
+**Which means the whole Senate comes down to eleven races, and Democrats need six of them.** Georgia, North Carolina, Maine, Michigan, Alaska, Ohio, Texas, Iowa, Florida, Kansas, South Carolina.
+
+The House is messier: 218 Republicans, 214 Democrats, one independent, two vacancies. Democrats need a net four seats.
+
+## Method one: Polling
+
+The first approach is tempting since polls are most similar to an election. So we take each race's polling average, convert the margin into a win probability, add the probabilities up, and you have an expected number of seats.
+
+The conversion is the only real step. A candidate up 4 points isn't 100% to win, they're maybe 77%, because polls miss. How much they miss by is the foggiest part to model: I used a normal distribution with a 5.5-point standard deviation on the margin, which is roughly what state-level Senate polling error has looked like recently.
+
+Run the eleven races through it:
+
+| | Dem margin | Win probability |
+|---|---|---|
+| North Carolina | +9.2 | 95% |
+| Georgia | +8.3 | 94% |
+| Ohio | +4.0 | 77% |
+| Maine | +2.4 | 67% |
+| Texas | +2.2 | 66% |
+| Alaska | +2.1 | 65% |
+| Michigan | +1.6 | 61% |
+| Iowa | −1.8 | 37% |
+| Florida | −3.4 | 27% |
+| Kansas | −8.0 | 7% |
+| South Carolina | *no polling* | — |
+
+Adding the probabilities: **5.95 expected seats out of eleven.** Together with the existing 45, and method 1 forecasts **51.0 Democratic senators**, with 51 as the single most likely outcome.
+
+Two things worth noting about this number:
+
+**South Carolina has no polling at all.**  I have it as a longshot on the tracker, but most pollsters don't consider this state in the realm of possibility, so I just put 0% here in the model to be safe.
+
+**And adding probabilities assumes the races are independent, which is false.** If the polls are systematically off in Ohio, they're off in Iowa the same direction, because factors that affect polling don't stop at state lines. When I re-run it with a national error term that moves every state together, the expected seats are still 51, but the 80% range widens from 49–53 to 48–54, and the probability of Democrats actually getting to 51 falls from 64% to 60%.
+
+## Method two: Markets
+
+Same arithmetic, different inputs. Instead of asking pollsters, ask people betting their own money. Polymarket and Kalshi both run per-race markets, and a contract trading at 65 cents is a 65% probability. The nice part about this method is that it (allegedly) factors in how 'sure' people are based on the amount of money they're willing to wager on the race. The weakness is that betting markets swing wildly from day to day, and this method will probably have a lot of variance in the following weeks.
+
+Sum those the same way and you get **50.70 expected Democratic seats** on Polymarket, **50.61** on Kalshi.
+
+<SenateSeatDistributionChart />
+
+So: polls say 51.0. Markets say 50.7. Both put the mode at exactly 51 seats. So all of this math later, we've landed on roughly the same most likely number.
+
+However, there's one point of disagreement that's worth analyzing for a moment.
+
+## Ohio and Texas
+
+Let's plot every race with its polling probability on one axis and its market price on the other. Anything on the diagonal is a race where the two methods agree.
+
+<SenatePollsVsMarketsChart />
+
+Most of them sit close to the line but two don't (at least among the non-longshots).
+
+In **Ohio**, Sherrod Brown leads Jon Husted by 4 points in the average. The polling model calls that a 77% chance. The market says 57%. In **Texas**, James Talarico leads Ken Paxton by 2, which the model reads as 66%. The market says 51%: a coin flip.
+
+Those gaps are 20 and 15 points, respectively. The implied claim is as follows: **traders think polls understate Republicans in red states, and they're pricing that in on top of the polling.** They watched 2016 and 2020 happen and they are not paying full price for a Democratic lead in Ohio or Texas, no matter what the average says.
+
+The polling model has no such opinion. It takes the margin at face value, because that's all it is: a margin and a standard deviation.
+
+One of these is going to be wrong in November, and it's the rare forecasting disagreement specific enough to actually settle. If Brown and Talarico both win, the market's red-state discount was superstition. If they both lose while the averages showed them ahead, then pollsters still have work to do to correct for the 2016/2020 shift that we've seen.
+
+(Worth noting Kansas runs the other way — the one poll there has the Democrat down 8, and the market prices him at 20% anyway, roughly triple what the poll implies. When there's one poll, the market mostly ignores it. Fair enough.)
+
+## Method three: The Keys
+
+Both methods so far are bottom-up. They need somebody to have polled a race or opened a market on it. Allan Lichtman has a popular approach that runs the opposite direction: ask a set of structural yes/no questions about the country, and count how many go against the party in power.
+
+There's no off-the-shelf version for midterms, so I attempted to build one in the same spirit (with the help of some AI extrapolation from Lichtman's work, thanks Claude). Here are ten keys, each written so TRUE favors the president's party:
+
+| Key | 2026 | |
+|---|---|---|
+| Approval at or above 50% | **FALSE** | 38.4% approve, 58.4% disapprove |
+| Generic ballot within 2 points | **FALSE** | Democrats +5.7 and climbing since March 2025 |
+| No recession | TRUE | ~2% growth, no recession |
+| Cost of living isn't the dominant issue | **FALSE** | affordability is the top grievance in every survey |
+| Not losing special elections | **FALSE** | Democrats overperformed in 36 of 43 measurable races |
+| No retirement wave | **FALSE** | 36 Republican House retirements, a record |
+| Redistricting favors the president's party | TRUE | seven Republican-drawn maps net about +15; California and Utah give six back |
+| No unpopular war | **FALSE** | [Iran](/blog/state-of-the-iran-war) |
+| Blame is shared | **FALSE** | Republicans hold the House, the Senate, and the presidency |
+| No weak marquee nominees | **FALSE** | Paxton in Texas |
+
+Eight of ten false. I calibrated the thresholds against every midterm from 1946 to 2022, and eight of ten is proportionally worse than any of them. The nearest comparisons are 1958, 1974 and 2010, which cost the president's party 48, 48 and 63 seats: call it a **40 to 60 seat loss**.
+
+Which is impossible. Here's the map:
+
+| Democrats win... | Seats |
+|---|---|
+| every Safe + Likely D seat | 191 |
+| + every Lean D | 202 |
+| + every Toss-up | 222 |
+| + every Lean R | 225 |
+| + every Likely R | 242 |
+
+The keys model says Democrats end up somewhere between 254 and 277. The ceiling, assuming they win literally every seat Cook doesn't rate Safe Republican, is 242. **The model returns a number that cannot happen.**
+
+And I don't think that's a bug in my version of it. I think it's the actual limit of the whole approach.
+
+The keys are reading the national mood correctly. The mood really is 2010-sized: a president at 38%, a record retirement wave, special elections swinging ten points. Every one of those false keys is true. What the model can't do is convert mood into seats, because that conversion runs through a map, and all the off cycle gerrymandering has eaten a huge portion of that. Not only has gerrymandering rigged some districts one way or the other, but it's also just removed the total number of competitive districts in the country, so the huge waves that we've seen in the past are likely just mathematically impossible nowadays.
+
+In 1958 or 1974 a wave had hundreds of genuinely competitive districts to move through. **In 2026, Cook rates 34 seats as competitive.** You cannot lose 55 seats when only 34 are for sale.
+
+Lichtman's method survives for the presidency because the presidency is one national contest with nothing in between the mood and the result. The House has a gerrymander in between, and it absorbs the wave before it becomes seats.
+
+## So what do I actually think
+
+The three methods aren't three answers to one question. They're measuring three different things: the state of the races, the money's opinion of the races, and the weather the races are happening in. That's why they converge on the Senate and split on the House: a Senate race is close enough to a national contest that all three see the same object, and a House majority is 435 local contests filtered through a map.
+
+So here are my official predictions roughly 2 months out:
+
+**Senate: 51 Democrats.** I had that number in my head before I ran any of this, which I'll admit made me suspicious of it. But it's the modal outcome under the polling model, the modal outcome under market prices, and the expected value of both to within a third of a seat. It requires Democrats to hold Georgia and Michigan and win four of Maine, North Carolina, Alaska, Ohio and Texas. That's the most likely single outcome and it is nowhere close to a safe bet — call it 55-60%, and a normal-sized polling error in either direction takes it to 48 or 54.
+
+**House: 230 Democrats.** This is where I'm departing from a model, so let me be honest about which one. Summing the district markets gets you about 220. A top-down approach using the generic ballot gets you 229. I'm siding with the second one because I believe the bottom-up methods to be structurally low. Markets only exist for districts somebody already flagged as competitive, and "competitive" was defined months ago, by ratings built for a normal year. In a wave, the seats that flip late are the ones nobody bothered to open a market on. The keys model can't tell me how many seats, but it tells me the environment is 2010-sized, and a 2010-sized environment doesn't stop politely at the edge of the toss-up list.
+
+If I'm wrong about the House it'll be because the map is even more rigid than I'm giving it credit for, and 220 was the real ceiling all along, which is a real possibility.

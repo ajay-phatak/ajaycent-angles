@@ -1,0 +1,307 @@
+---
+// Senate races: polling-implied win probability vs. betting-market price, Sep 9 2026.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch dot-quiet"></i>Race</span>
+		<span><i class="swatch dot-accent"></i>OH &amp; TX (polls vs. markets diverge most)</span>
+		<span><i class="swatch line-dash"></i>Line of agreement</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="polls-vs-markets-chart"
+			role="img"
+			aria-label="Scatter plot of ten competitive Senate races, comparing the Democratic win probability implied by polling averages (x-axis) against the Democratic price on betting markets (y-axis), both 0 to 100 percent, as of September 9, 2026. A diagonal line marks where the two methods agree. Most races sit close to that line. Ohio and Texas sit far below it: polls give Democrats a 77% and 66% chance, while markets price them at only 57% and 51%. Kansas sits above the line, with polls at 7% but markets at 20%."
+		>
+			Most of the ten Senate races sit near the line where polling and market odds agree.
+			Ohio and Texas are the exceptions: polls put Democrats' win probability at 77% and
+			66%, but markets price them at only 57% and 51%. Kansas sits on the other side,
+			with polls at 7% and markets at 20%.
+		</canvas>
+	</div>
+
+	<figcaption>
+		Polling win probabilities are derived from VoteHub polling averages using a normal
+		model with a 5.5-point standard deviation on the margin. Market prices are Polymarket's
+		Democratic win probability as of September 9, 2026. Both are sourced from the 2026
+		Election Tracker's API (elections.ajaycent.com). The dashed diagonal marks where the
+		two methods agree exactly; points above it are races markets are more bullish on
+		Democrats than polls, points below are races markets are more bearish. South Carolina
+		is excluded: it has no state-level polling to build a model from, though Polymarket
+		prices Democrats there at 15%.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.dot-quiet {
+		height: 9px;
+		width: 9px;
+		border-radius: 50%;
+		background: var(--ink-soft);
+		opacity: 0.55;
+	}
+	.dot-accent {
+		height: 11px;
+		width: 11px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+	.line-dash {
+		height: 0;
+		border-top: 2px dashed var(--ink-soft);
+		opacity: 0.6;
+	}
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 420px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 380px; }
+	}
+	@media (max-width: 560px) {
+		.chart-canvas { height: 420px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	/*
+	  Polling win probability: VoteHub polling averages run through a normal
+	  model on the margin (5.5-pt SD). Market: Polymarket Democratic win price,
+	  Sep 9 2026. Both via the 2026 Election Tracker API. South Carolina is
+	  excluded — no state polling exists to build a probability from.
+	*/
+	const races = [
+		{ state: 'GA', poll: 93.5, market: 93.5 },
+		{ state: 'NC', poll: 95.3, market: 91.5 },
+		{ state: 'OH', poll: 76.6, market: 56.5 },
+		{ state: 'ME', poll: 66.8, market: 72.5 },
+		{ state: 'TX', poll: 65.6, market: 50.5 },
+		{ state: 'AK', poll: 64.9, market: 63.5 },
+		{ state: 'MI', poll: 61.4, market: 65.5 },
+		{ state: 'IA', poll: 37.3, market: 34.5 },
+		{ state: 'FL', poll: 27.0, market: 7.5 },
+		{ state: 'KS', poll: 7.4, market: 20.0 },
+	];
+	const HIGHLIGHT = new Set(['OH', 'TX']);
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function render() {
+		const canvas = document.getElementById('polls-vs-markets-chart');
+		if (!canvas) return;
+		const c = palette();
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'pollsVsMarketsOverlay',
+			beforeDatasetsDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				ctx.save();
+				ctx.setLineDash([5, 4]);
+				ctx.lineWidth = 1.5;
+				ctx.strokeStyle = c.inkSoft;
+				ctx.globalAlpha = 0.6;
+				ctx.beginPath();
+				ctx.moveTo(scales.x.getPixelForValue(0), scales.y.getPixelForValue(0));
+				ctx.lineTo(scales.x.getPixelForValue(100), scales.y.getPixelForValue(100));
+				ctx.stroke();
+				ctx.setLineDash([]);
+				ctx.globalAlpha = 1;
+
+				ctx.font = `italic ${narrow ? 9 : 10.5}px ${c.serif}`;
+				ctx.fillStyle = c.inkSoft;
+				ctx.textAlign = 'right';
+				ctx.textBaseline = 'bottom';
+				ctx.save();
+				const lx = scales.x.getPixelForValue(97);
+				const ly = scales.y.getPixelForValue(97);
+				ctx.translate(lx, ly);
+				ctx.rotate(-Math.atan2(
+					scales.y.getPixelForValue(0) - scales.y.getPixelForValue(100),
+					scales.x.getPixelForValue(100) - scales.x.getPixelForValue(0),
+				));
+				ctx.fillText('Polls and markets agree', 0, -6);
+				ctx.restore();
+				ctx.restore();
+			},
+			afterDatasetsDraw(ch) {
+				const { ctx, scales } = ch;
+				ctx.save();
+				ctx.font = `500 ${narrow ? 9.5 : 10.5}px ${c.serif}`;
+				ctx.textAlign = 'left';
+				ctx.textBaseline = 'middle';
+				races.forEach((r) => {
+					const x = scales.x.getPixelForValue(r.poll);
+					const y = scales.y.getPixelForValue(r.market);
+					const emphasis = HIGHLIGHT.has(r.state);
+					ctx.fillStyle = emphasis ? c.teal : c.inkSoft;
+					ctx.font = `${emphasis ? '600' : '500'} ${narrow ? 9.5 : 10.5}px ${c.serif}`;
+					ctx.fillText(r.state, x + (emphasis ? 9 : 7), y - (emphasis ? 8 : 6));
+				});
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'scatter',
+			data: {
+				datasets: [
+					{
+						label: 'Other races',
+						data: races
+							.filter((r) => !HIGHLIGHT.has(r.state))
+							.map((r) => ({ x: r.poll, y: r.market })),
+						backgroundColor: c.inkSoft,
+						borderColor: c.bg,
+						borderWidth: 1.5,
+						pointRadius: narrow ? 4.5 : 5,
+						pointHoverRadius: narrow ? 6 : 6.5,
+					},
+					{
+						label: 'Ohio & Texas',
+						data: races
+							.filter((r) => HIGHLIGHT.has(r.state))
+							.map((r) => ({ x: r.poll, y: r.market })),
+						backgroundColor: c.teal,
+						borderColor: c.bg,
+						borderWidth: 1.75,
+						pointRadius: narrow ? 7 : 7.5,
+						pointHoverRadius: narrow ? 8.5 : 9,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 20, right: narrow ? 18 : 28, left: 4, bottom: 4 } },
+				interaction: { mode: 'nearest', intersect: true },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => {
+								const idx = items[0].datasetIndex;
+								const ds = idx === 1
+									? races.filter((r) => HIGHLIGHT.has(r.state))
+									: races.filter((r) => !HIGHLIGHT.has(r.state));
+								return ds[items[0].dataIndex].state;
+							},
+							label: (x) => [`Poll model: ${x.parsed.x.toFixed(1)}%`, `Market: ${x.parsed.y.toFixed(1)}%`],
+						},
+					},
+				},
+				scales: {
+					x: {
+						min: 0,
+						max: 100,
+						title: {
+							display: !narrow,
+							text: 'Polling-implied win probability (%)',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 20,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => `${v}%`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { color: c.rule },
+					},
+					y: {
+						min: 0,
+						max: 100,
+						title: {
+							display: !narrow,
+							text: 'Betting-market price (%)',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 20,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => `${v}%`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	/*
+	  The theme toggle writes data-theme during load, which can land mid-init and
+	  race Chart.js. Debounce so we always settle on one build of the chart.
+	*/
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[SenatePollsVsMarketsChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

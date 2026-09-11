@@ -1,0 +1,266 @@
+---
+// Distribution of possible Democratic Senate seat totals, polling model vs. betting markets.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch bar-teal"></i>Polling model</span>
+		<span><i class="swatch bar-warm"></i>Betting markets</span>
+		<span><i class="swatch line-dash"></i>Majority control</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="seat-distribution-chart"
+			role="img"
+			aria-label="Grouped bar chart of the probability of each possible Democratic Senate seat count, 45 through 56, under a polling model and under betting markets. A vertical line marks 51 seats, the majority threshold. Under the polling model, 51 seats is the most likely outcome at 30.1%. Under betting markets, 51 seats is also the most likely outcome at 28.2%. The polling model is slightly more favorable to Democrats overall, with more of its probability mass at or above 51 seats than the markets distribution."
+		>
+			51 seats is the single most likely outcome under both methods: 30.1% under the
+			polling model and 28.2% under betting markets. The polling model is slightly more
+			favorable to Democrats overall.
+		</canvas>
+	</div>
+
+	<figcaption>
+		Probabilities are derived from the 2026 Election Tracker's polling averages and
+		Polymarket prices, as of September 9, 2026. The polling series scores South Carolina
+		at zero, since the state has no polling to model; the markets series carries
+		Polymarket's 14.5% there, which is most of the gap between the two curves below 50
+		seats. Both distributions treat the eleven competitive races as independent, which
+		understates the true spread: a national
+		polling error moves many states at once, and correlating that error would widen both
+		curves substantially and lower the probability of any single outcome. Democrats need
+		51 seats for a majority, since the Vice President breaks a 50-50 tie; seat counts
+		below that line leave Democrats short of a majority.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.bar-teal { height: 11px; background: var(--accent); opacity: 0.75; }
+	.bar-warm { height: 11px; background: #b06135; opacity: 0.75; }
+	.line-dash {
+		height: 0;
+		border-top: 2px dashed var(--ink-soft);
+		opacity: 0.6;
+	}
+	:global([data-theme='dark']) .bar-warm { background: #d98f63; }
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 400px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 360px; }
+	}
+	@media (max-width: 560px) {
+		.chart-canvas { height: 420px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	/*
+	  Seat-count probabilities from the 2026 Election Tracker's polling
+	  averages (normal model on each race's margin) and Polymarket prices,
+	  Sep 9 2026. Both treat the 11 competitive races as independent. The polling
+	  series scores South Carolina at 0% — it has no state-level polling to model,
+	  so it is not credited to Democrats at all; the markets series carries
+	  Polymarket's 14.5% there.
+	*/
+	const seats = [];
+	for (let s = 45; s <= 56; s++) seats.push(s);
+
+	const pollingByseat = { 48: 2.6, 49: 10.0, 50: 22.6, 51: 30.1, 52: 23.1, 53: 9.4, 54: 1.7 };
+	const marketsByseat = { 47: 0.7, 48: 4.3, 49: 13.6, 50: 25.2, 51: 28.2, 52: 18.9, 53: 7.3, 54: 1.5 };
+
+	const polling = seats.map((s) => pollingByseat[s] ?? 0);
+	const markets = seats.map((s) => marketsByseat[s] ?? 0);
+	const MAJORITY = 51;
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function render() {
+		const canvas = document.getElementById('seat-distribution-chart');
+		if (!canvas) return;
+		const c = palette();
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'seatDistOverlay',
+			afterDatasetsDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				ctx.save();
+				// The majority line sits at the boundary between the 50 and 51 seat
+				// bar groups: the midpoint between their category centers. A category
+				// scale indexes by position, not by the label's value, so look the
+				// seat count up in `seats` first.
+				const mi = seats.indexOf(MAJORITY);
+				const x = (scales.x.getPixelForValue(mi - 1) + scales.x.getPixelForValue(mi)) / 2;
+				ctx.setLineDash([6, 4]);
+				ctx.lineWidth = 1.75;
+				ctx.strokeStyle = c.ink;
+				ctx.beginPath();
+				ctx.moveTo(x, a.top);
+				ctx.lineTo(x, a.bottom);
+				ctx.stroke();
+				ctx.setLineDash([]);
+
+				// One label on the line itself; the figcaption carries the detail about
+				// why 51 is the threshold, so the chart doesn't repeat it.
+				ctx.font = `italic ${narrow ? 9 : 10.5}px ${c.serif}`;
+				ctx.fillStyle = c.ink;
+				ctx.textAlign = 'left';
+				ctx.textBaseline = 'top';
+				ctx.fillText('Majority control', x + 6, a.top + 4);
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'bar',
+			data: {
+				labels: seats,
+				datasets: [
+					{
+						label: 'Polling model',
+						data: polling,
+						backgroundColor: c.teal,
+						borderColor: c.teal,
+						borderWidth: 0,
+						categoryPercentage: 0.7,
+						barPercentage: 0.85,
+					},
+					{
+						label: 'Betting markets',
+						data: markets,
+						backgroundColor: c.warm,
+						borderColor: c.warm,
+						borderWidth: 0,
+						categoryPercentage: 0.7,
+						barPercentage: 0.85,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 26, right: 10 } },
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => `${items[0].label} Democratic seats`,
+							label: (x) => `${x.dataset.label}: ${x.parsed.y.toFixed(1)}%`,
+						},
+					},
+				},
+				scales: {
+					y: {
+						min: 0,
+						max: 32,
+						title: {
+							display: !narrow,
+							text: 'Probability (%)',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => `${v}%`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+					x: {
+						title: {
+							display: !narrow,
+							text: 'Democratic Senate seats',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 9.5 : 11 },
+							autoSkip: false,
+							maxRotation: 0,
+						},
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	/*
+	  The theme toggle writes data-theme during load, which can land mid-init and
+	  race Chart.js. Debounce so we always settle on one build of the chart.
+	*/
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[SenateSeatDistributionChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>
