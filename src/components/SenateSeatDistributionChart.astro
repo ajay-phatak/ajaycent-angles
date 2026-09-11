@@ -66,7 +66,13 @@
 		border-top: 2px dashed var(--ink-soft);
 		opacity: 0.6;
 	}
+	/* Repeated under the media query so the swatch still flips when BaseHead's
+	   inline theme script never runs (JS off): global.css darkens its tokens from
+	   prefers-color-scheme alone, leaving this hardcoded color behind. */
 	:global([data-theme='dark']) .bar-warm { background: #d98f63; }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .bar-warm { background: #d98f63; }
+	}
 
 	.chart-canvas {
 		position: relative;
