@@ -60,9 +60,17 @@
 	.bar-blue { height: 11px; background: rgba(63, 94, 190, 0.55); }
 	.bar-red { height: 11px; background: rgba(196, 60, 48, 0.55); }
 	.line-warm { height: 3px; background: #b06135; }
+	/* Repeated under the media query so the swatches still flip when BaseHead's
+	   inline theme script never runs (JS off): global.css darkens its tokens from
+	   prefers-color-scheme alone, leaving these hardcoded colors behind. */
 	:global([data-theme='dark']) .bar-blue { background: rgba(110, 140, 235, 0.6); }
 	:global([data-theme='dark']) .bar-red { background: rgba(235, 110, 100, 0.6); }
 	:global([data-theme='dark']) .line-warm { background: #d98f63; }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .bar-blue { background: rgba(110, 140, 235, 0.6); }
+		:global(:root:not([data-theme='light'])) .bar-red { background: rgba(235, 110, 100, 0.6); }
+		:global(:root:not([data-theme='light'])) .line-warm { background: #d98f63; }
+	}
 
 	.chart-canvas {
 		position: relative;

@@ -71,11 +71,21 @@
 	.sw-crisis { background: rgba(0, 114, 126, 0.7); }
 	.sw-rest { background: rgba(120, 130, 160, 0.28); }
 	.line-ink { height: 3px; background: var(--ink); }
+	/* Repeated under the media query so the swatches still flip when BaseHead's
+	   inline theme script never runs (JS off): global.css darkens its tokens from
+	   prefers-color-scheme alone, leaving these hardcoded colors behind. */
 	:global([data-theme='dark']) .sw-interest { background: rgba(165, 169, 183, 0.7); }
 	:global([data-theme='dark']) .sw-tax { background: rgba(217, 143, 99, 0.8); }
 	:global([data-theme='dark']) .sw-wars { background: rgba(200, 90, 78, 0.8); }
 	:global([data-theme='dark']) .sw-crisis { background: rgba(77, 189, 202, 0.7); }
 	:global([data-theme='dark']) .sw-rest { background: rgba(150, 160, 190, 0.3); }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .sw-interest { background: rgba(165, 169, 183, 0.7); }
+		:global(:root:not([data-theme='light'])) .sw-tax { background: rgba(217, 143, 99, 0.8); }
+		:global(:root:not([data-theme='light'])) .sw-wars { background: rgba(200, 90, 78, 0.8); }
+		:global(:root:not([data-theme='light'])) .sw-crisis { background: rgba(77, 189, 202, 0.7); }
+		:global(:root:not([data-theme='light'])) .sw-rest { background: rgba(150, 160, 190, 0.3); }
+	}
 
 	.chart-canvas {
 		position: relative;

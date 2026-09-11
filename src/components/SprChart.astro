@@ -74,8 +74,16 @@
 		border-top: 1px dashed var(--accent);
 		border-bottom: 1px dashed var(--accent);
 	}
+	/* Two selectors for one rule: the attribute covers BaseHead's inline theme
+	   script, the media query covers the case where that script never runs (JS
+	   off) — global.css darkens its tokens from prefers-color-scheme alone, so
+	   without this the warm swatch stays light against a dark page. */
 	:global([data-theme='dark']) .line-warm,
 	:global([data-theme='dark']) .line-warm-faint { background: #d98f63; }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .line-warm,
+		:global(:root:not([data-theme='light'])) .line-warm-faint { background: #d98f63; }
+	}
 
 	.chart-canvas {
 		position: relative;
