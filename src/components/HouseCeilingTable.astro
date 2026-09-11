@@ -1,0 +1,180 @@
+---
+// Cumulative Democratic House seats as you fold in each rating tier, from Cook's
+// current ratings. The last row is the hard ceiling: every seat Cook does not
+// rate Safe Republican.
+const TIERS = [
+	{ label: 'every Safe + Likely D seat', seats: 191 },
+	{ label: '+ every Lean D', seats: 202 },
+	{ label: '+ every Toss-up', seats: 222 },
+	{ label: '+ every Lean R', seats: 225 },
+	{ label: '+ every Likely R', seats: 242, ceiling: true },
+];
+
+const MAJORITY = 218;
+// The whole story sits between 190 and 242, so the scale starts near the floor
+// rather than at zero — a zero-based bar would compress every tier into noise.
+const MIN = 180;
+const MAX = 250;
+const pct = (n: number) => ((n - MIN) / (MAX - MIN)) * 100;
+---
+
+<figure class="ceiling">
+	<div class="ceiling-head">
+		<span>Cumulative Democratic seats</span>
+		<span class="ceiling-note">{MAJORITY} for a majority</span>
+	</div>
+
+	<ol class="ceiling-list" style={`--majority:${pct(MAJORITY)}%`}>
+		{
+			TIERS.map((t) => (
+				<li class={t.seats >= MAJORITY ? 'won' : 'short'}>
+					<span class="label">
+						{t.label}
+						{t.ceiling && <em class="tag">ceiling</em>}
+					</span>
+					<span class="track">
+						<i class="fill" style={`width:${pct(t.seats)}%`} />
+					</span>
+					<span class="seats">{t.seats}</span>
+				</li>
+			))
+		}
+	</ol>
+</figure>
+
+<style>
+	.ceiling {
+		--warm: #b06135;
+		margin: 2.5em 0;
+		padding: 0;
+	}
+
+	.ceiling-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.4em 1.2em;
+		padding-bottom: 0.7em;
+		border-bottom: 1px solid var(--rule);
+		font-family: var(--font-serif);
+		font-size: 0.8rem;
+		color: var(--ink-soft);
+	}
+
+	.ceiling-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		position: relative;
+	}
+	.ceiling-list li {
+		display: grid;
+		grid-template-columns: 12.5em 1fr 2.6em;
+		align-items: center;
+		gap: 0 0.9em;
+		padding: 0.55em 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.label {
+		line-height: 1.35;
+	}
+	li.short .label {
+		color: var(--ink-soft);
+	}
+	li.won .label {
+		font-weight: 600;
+	}
+	.tag {
+		margin-left: 0.5em;
+		font-family: var(--font-serif);
+		font-style: normal;
+		font-size: 0.65rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--accent);
+		border: 1px solid var(--accent);
+		border-radius: 3px;
+		padding: 0.05em 0.4em;
+		white-space: nowrap;
+	}
+
+	.track {
+		position: relative;
+		height: 11px;
+		min-width: 70px;
+		background: var(--rule);
+		border-radius: 6px;
+	}
+	/* The majority line sits at the same x on every row, so the jump from 202 to
+	   222 visibly crosses it — that crossing is the argument. */
+	.track::after {
+		content: '';
+		position: absolute;
+		left: var(--majority);
+		top: -4px;
+		bottom: -4px;
+		width: 1.5px;
+		background: var(--ink);
+		opacity: 0.55;
+	}
+	.fill {
+		display: block;
+		height: 100%;
+		border-radius: 6px;
+	}
+	li.short .fill {
+		background: var(--warm);
+		opacity: 0.75;
+	}
+	li.won .fill {
+		background: var(--accent);
+	}
+
+	.seats {
+		font-family: var(--font-serif);
+		font-size: 0.95rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+	li.won .seats {
+		color: var(--accent);
+		font-weight: 700;
+	}
+	li.short .seats {
+		color: var(--ink-soft);
+	}
+
+
+	@media (max-width: 520px) {
+		.ceiling-list li {
+			grid-template-columns: 1fr 2.6em;
+			grid-template-areas:
+				'label seats'
+				'track track';
+			gap: 0.3em 0.7em;
+			padding: 0.65em 0;
+		}
+		.label {
+			grid-area: label;
+		}
+		.seats {
+			grid-area: seats;
+		}
+		.track {
+			grid-area: track;
+		}
+	}
+	/* One warm token, flipped for dark twice over: the attribute covers BaseHead's
+	   theme script, the media query covers the paint before that script runs —
+	   global.css has already darkened its tokens by then. */
+	:global([data-theme='dark']) .ceiling {
+		--warm: #d98f63;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .ceiling {
+			--warm: #d98f63;
+		}
+	}
+</style>

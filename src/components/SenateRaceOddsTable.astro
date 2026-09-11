@@ -1,0 +1,209 @@
+---
+// The eleven competitive Senate races: polling margin and the win probability a
+// normal model puts on it (5.5-point SD). South Carolina has no polling, so it
+// carries no probability at all rather than a made-up one.
+const RACES = [
+	{ state: 'North Carolina', margin: 9.2, prob: 95 },
+	{ state: 'Georgia', margin: 8.3, prob: 94 },
+	{ state: 'Ohio', margin: 4.0, prob: 77 },
+	{ state: 'Maine', margin: 2.4, prob: 67 },
+	{ state: 'Texas', margin: 2.2, prob: 66 },
+	{ state: 'Alaska', margin: 2.1, prob: 65 },
+	{ state: 'Michigan', margin: 1.6, prob: 61 },
+	{ state: 'Iowa', margin: -1.8, prob: 37 },
+	{ state: 'Florida', margin: -3.4, prob: 27 },
+	{ state: 'Kansas', margin: -8.0, prob: 7 },
+	{ state: 'South Carolina', margin: null, prob: null },
+];
+
+const fmtMargin = (m: number | null) =>
+	m === null ? 'no polling' : (m > 0 ? '+' : '−') + Math.abs(m).toFixed(1);
+---
+
+<figure class="odds">
+	<div class="odds-head">
+		<span>Democratic win probability</span>
+		<span class="odds-legend">
+			<i class="pip up"></i>favored
+			<i class="pip down"></i>behind
+		</span>
+	</div>
+
+	<ol class="odds-list">
+		{
+			RACES.map((r) => (
+				<li class={r.prob === null ? 'none' : r.prob >= 50 ? 'up' : 'down'}>
+					<span class="state">{r.state}</span>
+					<span class="margin">{fmtMargin(r.margin)}</span>
+					<span class="track">
+						{r.prob !== null && <i class="fill" style={`width:${r.prob}%`} />}
+					</span>
+					<span class="prob">{r.prob === null ? '—' : r.prob + '%'}</span>
+				</li>
+			))
+		}
+	</ol>
+</figure>
+
+<style>
+	.odds {
+		--warm: #b06135;
+		margin: 2.5em 0;
+		padding: 0;
+	}
+
+	.odds-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.4em 1.2em;
+		padding-bottom: 0.7em;
+		border-bottom: 1px solid var(--rule);
+		font-family: var(--font-serif);
+		font-size: 0.8rem;
+		color: var(--ink-soft);
+	}
+	.odds-legend {
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+		font-size: 0.75rem;
+	}
+	.odds-legend .pip:not(:first-child) {
+		margin-left: 0.9em;
+	}
+	.pip {
+		display: inline-block;
+		width: 9px;
+		height: 9px;
+		flex-shrink: 0;
+		border-radius: 50%;
+	}
+	.pip.up {
+		background: var(--accent);
+	}
+	.pip.down {
+		background: var(--warm);
+	}
+
+	.odds-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.odds-list li {
+		display: grid;
+		grid-template-columns: 9.5em 4em 1fr 3em;
+		align-items: center;
+		gap: 0 0.9em;
+		padding: 0.55em 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.state {
+		line-height: 1.35;
+	}
+	li.up .state {
+		font-weight: 600;
+	}
+	li.none .state {
+		color: var(--ink-soft);
+	}
+
+	.margin {
+		font-family: var(--font-serif);
+		font-size: 0.85rem;
+		text-align: right;
+		color: var(--ink-soft);
+		font-variant-numeric: tabular-nums;
+	}
+	li.none .margin {
+		font-size: 0.75rem;
+		font-style: italic;
+	}
+
+	/* The bar is the point of the table: it puts the 50% line in the same place
+	   on every row, so the break between favored and behind is visible at a glance. */
+	.track {
+		position: relative;
+		height: 9px;
+		min-width: 60px;
+		background: var(--rule);
+		border-radius: 5px;
+		overflow: hidden;
+	}
+	.track::after {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: -3px;
+		bottom: -3px;
+		width: 1px;
+		background: var(--ink-soft);
+		opacity: 0.45;
+	}
+	.fill {
+		display: block;
+		height: 100%;
+		border-radius: 5px;
+	}
+	li.up .fill {
+		background: var(--accent);
+	}
+	li.down .fill {
+		background: var(--warm);
+	}
+
+	.prob {
+		font-family: var(--font-serif);
+		font-size: 0.9rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+	li.up .prob {
+		color: var(--accent);
+		font-weight: 700;
+	}
+	li.down .prob {
+		color: var(--warm);
+	}
+	li.none .prob {
+		color: var(--ink-soft);
+	}
+
+
+	@media (max-width: 520px) {
+		.odds-list li {
+			grid-template-columns: 1fr 3.5em 3em;
+			grid-template-areas:
+				'state  margin prob'
+				'track  track  track';
+			gap: 0.3em 0.7em;
+			padding: 0.65em 0;
+		}
+		.state {
+			grid-area: state;
+		}
+		.margin {
+			grid-area: margin;
+		}
+		.prob {
+			grid-area: prob;
+		}
+		.track {
+			grid-area: track;
+		}
+	}
+	/* One warm token, flipped for dark twice over: the attribute covers BaseHead's
+	   theme script, the media query covers the paint before that script runs —
+	   global.css has already darkened its tokens by then. */
+	:global([data-theme='dark']) .odds {
+		--warm: #d98f63;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .odds {
+			--warm: #d98f63;
+		}
+	}
+</style>

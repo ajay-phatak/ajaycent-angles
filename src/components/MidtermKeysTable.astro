@@ -42,6 +42,7 @@ const turned = KEYS.filter((k) => !k.held).length;
 
 <style>
 	.keys {
+		--warm: #b06135;
 		margin: 2.5em 0;
 		padding: 0;
 	}
@@ -85,7 +86,7 @@ const turned = KEYS.filter((k) => !k.held).length;
 		background: var(--accent);
 	}
 	.pip.turned {
-		background: #b06135;
+		background: var(--warm);
 	}
 
 	.keys-list {
@@ -106,7 +107,7 @@ const turned = KEYS.filter((k) => !k.held).length;
 	}
 	/* Turned keys carry the weight — eight of ten is the whole point of the table. */
 	.keys-list li.turned {
-		border-left-color: #b06135;
+		border-left-color: var(--warm);
 	}
 	.keys-list li.held {
 		border-left-color: var(--accent);
@@ -121,7 +122,7 @@ const turned = KEYS.filter((k) => !k.held).length;
 		line-height: 1.7;
 	}
 	li.turned .state {
-		color: #b06135;
+		color: var(--warm);
 		font-weight: 700;
 	}
 	li.held .state {
@@ -147,17 +148,6 @@ const turned = KEYS.filter((k) => !k.held).length;
 		color: var(--ink-soft);
 	}
 
-	/* BaseHead always writes data-theme, so the attribute selector is enough —
-	   same pattern the chart components use for this warm accent. */
-	:global([data-theme='dark']) .pip.turned {
-		background: #d98f63;
-	}
-	:global([data-theme='dark']) li.turned .state {
-		color: #d98f63;
-	}
-	:global([data-theme='dark']) .keys-list li.turned {
-		border-left-color: #d98f63;
-	}
 
 	@media (max-width: 520px) {
 		.keys-list li {
@@ -168,6 +158,17 @@ const turned = KEYS.filter((k) => !k.held).length;
 				'evidence';
 			gap: 0.1em;
 			padding-left: 0.7em;
+		}
+	}
+	/* One warm token, flipped for dark twice over: the attribute covers BaseHead's
+	   theme script, the media query covers the paint before that script runs —
+	   global.css has already darkened its tokens by then. */
+	:global([data-theme='dark']) .keys {
+		--warm: #d98f63;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .keys {
+			--warm: #d98f63;
 		}
 	}
 </style>

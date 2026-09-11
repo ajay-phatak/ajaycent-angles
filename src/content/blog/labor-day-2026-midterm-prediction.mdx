@@ -6,6 +6,8 @@ pubDate: 'Sep 10 2026'
 
 import SenatePollsVsMarketsChart from '../../components/SenatePollsVsMarketsChart.astro';
 import SenateSeatDistributionChart from '../../components/SenateSeatDistributionChart.astro';
+import SenateRaceOddsTable from '../../components/SenateRaceOddsTable.astro';
+import HouseCeilingTable from '../../components/HouseCeilingTable.astro';
 import MidtermKeysTable from '../../components/MidtermKeysTable.astro';
 
 Typically, in election cycles, Labor Day marks the last stretch of the campaigns, so with the 2026 midterms coming up fast, I figured now would be a good time to take a snapshot of where things stand, and run some numbers on what I predict the results to be (assuming nothing crazy happens in the next 2 months).
@@ -32,19 +34,7 @@ The conversion is the only real step. A candidate up 4 points isn't 100% to win,
 
 Run the eleven races through it:
 
-| | Dem margin | Win probability |
-|---|---|---|
-| North Carolina | +9.2 | 95% |
-| Georgia | +8.3 | 94% |
-| Ohio | +4.0 | 77% |
-| Maine | +2.4 | 67% |
-| Texas | +2.2 | 66% |
-| Alaska | +2.1 | 65% |
-| Michigan | +1.6 | 61% |
-| Iowa | −1.8 | 37% |
-| Florida | −3.4 | 27% |
-| Kansas | −8.0 | 7% |
-| South Carolina | *no polling* | — |
+<SenateRaceOddsTable />
 
 Adding the probabilities: **5.95 expected seats out of eleven.** Together with the existing 45, and method 1 forecasts **51.0 Democratic senators**, with 51 as the single most likely outcome.
 
@@ -96,13 +86,7 @@ Eight of ten false. I calibrated the thresholds against every midterm from 1946 
 
 Which is impossible. Here's the map:
 
-| Democrats win... | Seats |
-|---|---|
-| every Safe + Likely D seat | 191 |
-| + every Lean D | 202 |
-| + every Toss-up | 222 |
-| + every Lean R | 225 |
-| + every Likely R | 242 |
+<HouseCeilingTable />
 
 The keys model says Democrats end up somewhere between 254 and 277. The ceiling, assuming they win literally every seat Cook doesn't rate Safe Republican, is 242. **The model returns a number that cannot happen.**
 
