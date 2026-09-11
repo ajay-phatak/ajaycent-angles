@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:post": "node scripts/build-post.js",
+    "build:facebook": "node scripts/facebook-version.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.3",
