@@ -1,0 +1,173 @@
+---
+// The ten midterm keys, coded for 2026. `held: true` means the key favors the
+// president's party (Republicans); false means it has turned against them.
+// `evidence` is rendered as HTML so a key can cite another post.
+const KEYS = [
+	{ key: 'Approval at or above 50%', held: false, evidence: '38.4% approve, 58.4% disapprove' },
+	{ key: 'Generic ballot within 2 points', held: false, evidence: 'Democrats +5.7 and climbing since March 2025' },
+	{ key: 'No recession', held: true, evidence: '~2% growth, no recession' },
+	{ key: "Cost of living isn't the dominant issue", held: false, evidence: 'affordability is the top grievance in every survey' },
+	{ key: 'Not losing special elections', held: false, evidence: 'Democrats overperformed in 36 of 43 measurable races' },
+	{ key: 'No retirement wave', held: false, evidence: '36 Republican House retirements, a record' },
+	{ key: "Redistricting favors the president's party", held: true, evidence: 'seven Republican-drawn maps net about +15; California and Utah give six back' },
+	{ key: 'No unpopular war', held: false, evidence: '<a href="/blog/state-of-the-iran-war">Iran</a>' },
+	{ key: 'Blame is shared', held: false, evidence: 'Republicans hold the House, the Senate, and the presidency' },
+	{ key: 'No weak marquee nominees', held: false, evidence: 'Paxton in Texas' },
+];
+
+const turned = KEYS.filter((k) => !k.held).length;
+---
+
+<figure class="keys">
+	<div class="keys-head">
+		<span class="keys-count"><b>{turned}</b> of {KEYS.length} false</span>
+		<span class="keys-legend">
+			<i class="pip held"></i>favors the president's party
+			<i class="pip turned"></i>turned against it
+		</span>
+	</div>
+
+	<ol class="keys-list">
+		{
+			KEYS.map((k) => (
+				<li class={k.held ? 'held' : 'turned'}>
+					<span class="state">{k.held ? 'True' : 'False'}</span>
+					<span class="statement">{k.key}</span>
+					<span class="evidence" set:html={k.evidence} />
+				</li>
+			))
+		}
+	</ol>
+</figure>
+
+<style>
+	.keys {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+
+	.keys-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.4em 1.2em;
+		padding-bottom: 0.7em;
+		border-bottom: 1px solid var(--rule);
+		font-family: var(--font-serif);
+	}
+	.keys-count {
+		font-size: 0.95rem;
+		color: var(--ink-soft);
+	}
+	.keys-count b {
+		font-size: 1.15rem;
+		color: var(--ink);
+	}
+	.keys-legend {
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+		font-size: 0.75rem;
+		color: var(--ink-soft);
+	}
+	.keys-legend .pip:not(:first-child) {
+		margin-left: 0.9em;
+	}
+	.pip {
+		display: inline-block;
+		width: 9px;
+		height: 9px;
+		flex-shrink: 0;
+		border-radius: 50%;
+	}
+	.pip.held {
+		background: var(--accent);
+	}
+	.pip.turned {
+		background: #b06135;
+	}
+
+	.keys-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.keys-list li {
+		display: grid;
+		grid-template-columns: 3.6em 1fr;
+		grid-template-areas:
+			'state statement'
+			'.     evidence';
+		gap: 0.15em 0.9em;
+		padding: 0.7em 0 0.7em 0.8em;
+		border-bottom: 1px solid var(--rule);
+		border-left: 3px solid transparent;
+	}
+	/* Turned keys carry the weight — eight of ten is the whole point of the table. */
+	.keys-list li.turned {
+		border-left-color: #b06135;
+	}
+	.keys-list li.held {
+		border-left-color: var(--accent);
+	}
+
+	.state {
+		grid-area: state;
+		font-family: var(--font-serif);
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		line-height: 1.7;
+	}
+	li.turned .state {
+		color: #b06135;
+		font-weight: 700;
+	}
+	li.held .state {
+		color: var(--accent);
+	}
+
+	.statement {
+		grid-area: statement;
+		line-height: 1.45;
+	}
+	li.turned .statement {
+		font-weight: 600;
+	}
+	li.held .statement {
+		color: var(--ink-soft);
+	}
+
+	.evidence {
+		grid-area: evidence;
+		font-family: var(--font-serif);
+		font-size: 0.85rem;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+
+	/* BaseHead always writes data-theme, so the attribute selector is enough —
+	   same pattern the chart components use for this warm accent. */
+	:global([data-theme='dark']) .pip.turned {
+		background: #d98f63;
+	}
+	:global([data-theme='dark']) li.turned .state {
+		color: #d98f63;
+	}
+	:global([data-theme='dark']) .keys-list li.turned {
+		border-left-color: #d98f63;
+	}
+
+	@media (max-width: 520px) {
+		.keys-list li {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				'state'
+				'statement'
+				'evidence';
+			gap: 0.1em;
+			padding-left: 0.7em;
+		}
+	}
+</style>

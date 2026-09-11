@@ -6,6 +6,7 @@ pubDate: 'Sep 10 2026'
 
 import SenatePollsVsMarketsChart from '../../components/SenatePollsVsMarketsChart.astro';
 import SenateSeatDistributionChart from '../../components/SenateSeatDistributionChart.astro';
+import MidtermKeysTable from '../../components/MidtermKeysTable.astro';
 
 Typically, in election cycles, Labor Day marks the last stretch of the campaigns, so with the 2026 midterms coming up fast, I figured now would be a good time to take a snapshot of where things stand, and run some numbers on what I predict the results to be (assuming nothing crazy happens in the next 2 months).
 
@@ -89,18 +90,7 @@ Both methods so far are bottom-up. They need somebody to have polled a race or o
 
 There's no off-the-shelf version for midterms, so I attempted to build one in the same spirit (with the help of some AI extrapolation from Lichtman's work, thanks Claude). Here are ten keys, each written so TRUE favors the president's party:
 
-| Key | 2026 | |
-|---|---|---|
-| Approval at or above 50% | **FALSE** | 38.4% approve, 58.4% disapprove |
-| Generic ballot within 2 points | **FALSE** | Democrats +5.7 and climbing since March 2025 |
-| No recession | TRUE | ~2% growth, no recession |
-| Cost of living isn't the dominant issue | **FALSE** | affordability is the top grievance in every survey |
-| Not losing special elections | **FALSE** | Democrats overperformed in 36 of 43 measurable races |
-| No retirement wave | **FALSE** | 36 Republican House retirements, a record |
-| Redistricting favors the president's party | TRUE | seven Republican-drawn maps net about +15; California and Utah give six back |
-| No unpopular war | **FALSE** | [Iran](/blog/state-of-the-iran-war) |
-| Blame is shared | **FALSE** | Republicans hold the House, the Senate, and the presidency |
-| No weak marquee nominees | **FALSE** | Paxton in Texas |
+<MidtermKeysTable />
 
 Eight of ten false. I calibrated the thresholds against every midterm from 1946 to 2022, and eight of ten is proportionally worse than any of them. The nearest comparisons are 1958, 1974 and 2010, which cost the president's party 48, 48 and 63 seats: call it a **40 to 60 seat loss**.
 
