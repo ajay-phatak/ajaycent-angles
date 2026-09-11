@@ -1,5 +1,5 @@
 ---
-// Strategic Petroleum Reserve vs. WTI futures/spot, Jan 2025 – Aug 2026.
+// Strategic Petroleum Reserve vs. WTI futures/spot, Jan 2025 – Sep 2026.
 ---
 
 <figure class="chart">
@@ -14,10 +14,10 @@
 		<canvas
 			id="spr-chart"
 			role="img"
-			aria-label="The U.S. Strategic Petroleum Reserve against WTI oil prices from January 2025 to August 2026. The reserve refills to a peak of 415 million barrels in early March 2026, then falls to 289.7 million by the week ending August 21, 2026. WTI spot peaks above $102 in May 2026 while 12-month futures never exceed $76, a backwardation of more than $26."
+			aria-label="The U.S. Strategic Petroleum Reserve against WTI oil prices from January 2025 to August 2026. The reserve refills to a peak of 415 million barrels in early March 2026, then falls to 285.4 million by the week ending September 4, 2026. WTI spot peaks above $102 in May 2026 while 12-month futures never exceed $76, a backwardation of more than $26."
 		>
-			The SPR fell from 415 million barrels to 289.7 million between March and August 21,
-			2026, consuming about 77% of the reserve usable above the statutory floor. WTI spot
+			The SPR fell from 415 million barrels to 285.4 million between March and September 4,
+			2026, consuming about 80% of the reserve usable above the statutory floor. WTI spot
 			peaked at $102 while 12-month futures stayed below $76.
 		</canvas>
 	</div>
@@ -34,10 +34,11 @@
 		Cushing WTI monthly average). Futures: NYMEX settlement for the contract expiring twelve
 		months after each observation month — contracts dated before August 2025 have expired and
 		are no longer published, so that series begins there. Monthly reserve points are the first
-		weekly reading of each month; the final point is the week ending August 21, 2026, the most
-		recent EIA reading. August is a partial month, so the run into it is dashed on every series:
-		its price points cover August 1–21 only, and spot there is the average of EIA's weekly
-		Cushing readings, because the monthly average for August has not been published yet. Statutory floor of 252.4M barrels per 42 U.S.C. §6241.
+		weekly reading of each month; the final point is the week ending September 4, 2026, the most
+		recent EIA reading. September is a partial month, so the run into it is dashed on every
+		series: only one week of it has been reported, so spot there is that week's Cushing reading
+		rather than a monthly average, and the futures point averages settlements over the same
+		days. Statutory floor of 252.4M barrels per 42 U.S.C. §6241.
 	</figcaption>
 </figure>
 
@@ -127,43 +128,45 @@
 
 	const labels = [
 		"Jan '25", 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-		"Jan '26", 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+		"Jan '26", 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
 	];
 	/*
 	  Each month is the first EIA weekly stock reading of that month. The last
-	  point is the exception: it is the week ending Aug 21, 2026, so the series
-	  ends where the data does rather than a month short.
+	  point, the week ending Sep 4, 2026, is both September's first reading and
+	  the most recent one EIA has published.
 	*/
 	const spr = [
 		393.8, 395.3, 395.6, 396.7, 399.1, 402.1, 403.0, 403.0, 405.2, 407.0, 410.4, 411.9,
-		413.5, 415.2, 415.4, 413.3, 392.7, 349.2, 304.8, 289.7,
+		413.5, 415.2, 415.4, 413.3, 392.7, 349.2, 304.8, 298.7, 285.4,
 	];
 	/*
-	  Spot: EIA Cushing WTI monthly average (RWTCm). Aug 2026 is the exception:
-	  RWTCm has not published it yet, so that point is the mean of the weekly
-	  Cushing readings through the week ending Aug 21.
+	  Spot: EIA Cushing WTI monthly average (RWTCm). Sep 2026 is the exception:
+	  RWTCm has not published it yet and only one week of the month has been
+	  reported, so that point is the weekly Cushing reading for the week ending
+	  Sep 4.
 	  Futures: NYMEX settlement for the contract expiring 12 months after each
 	  observation month. Contracts dated before Aug 2025 have expired and are no
-	  longer retrievable, so the forward series starts there. The Aug 2026 point
-	  averages CLQ27 settlements over Aug 3-21 only, matching the spot window
+	  longer retrievable, so the forward series starts there. The Sep 2026 point
+	  averages CLU27 settlements over Sep 1-4 only, matching the spot window
 	  rather than running a full month ahead of it.
 	*/
 	const spot = [
 		75.7, 71.5, 68.2, 63.5, 62.2, 68.2, 68.4, 64.9, 64.0, 60.9, 60.1, 58.0,
-		60.0, 64.5, 91.4, 100.3, 102.1, 84.8, 80.5, 83.4,
+		60.0, 64.5, 91.4, 100.3, 102.1, 84.8, 80.5, 83.9, 91.2,
 	];
 	const futures = [
 		null, null, null, null, null, null, null, 61.8, 62.0, 59.5, 59.1, 57.5,
-		58.8, 61.5, 70.9, 72.9, 75.7, 71.9, 70.5, 71.4,
+		58.8, 61.5, 70.9, 72.9, 75.7, 71.9, 70.5, 71.7, 72.3,
 	];
 
 	const WAR = 14;
 	const LAST = spr.length - 1;
 	/*
-	  August 2026 is a partial month: the reserve point is the week ending Aug 21
-	  and the price points cover only Aug 1-21. Dash the run into it on every
-	  series so the last number reads as pending rather than closed. Returning
-	  undefined leaves the rest of the line at the dataset's own solid style.
+	  September 2026 is a partial month: the reserve point is the week ending
+	  Sep 4 and the price points cover only that week. Dash the run into it on
+	  every series so the last number reads as pending rather than closed.
+	  Returning undefined leaves the rest of the line at the dataset's own solid
+	  style.
 	*/
 	const pendingDash = (ctx) => (ctx.p0DataIndex === LAST - 1 ? [5, 4] : undefined);
 	const FLOOR = 252.4;
