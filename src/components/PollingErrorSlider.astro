@@ -1,0 +1,751 @@
+---
+// "What if the polls are wrong by X points": one slider for a uniform national
+// polling error, live-updating a Senate panel and a House panel. Pure arithmetic,
+// no randomness. Positive error = polls understated Democrats.
+const SENATE = {"baseDemSeats":45,"majority":51,"races":[{"state":"GA","name":"Georgia","margin":8.9},{"state":"NC","name":"North Carolina","margin":9.5},{"state":"ME","name":"Maine","margin":2.1},{"state":"MI","name":"Michigan","margin":1.9},{"state":"AK","name":"Alaska","margin":0.6},{"state":"OH","name":"Ohio","margin":3.3},{"state":"TX","name":"Texas","margin":2.5},{"state":"IA","name":"Iowa","margin":-0.2},{"state":"FL","name":"Florida","margin":-5.1},{"state":"KS","name":"Kansas","margin":-1.3},{"state":"SC","name":"South Carolina","margin":-1.5}]};
+const GENERIC_BALLOT = { dem: 50.1, rep: 41.4 };
+const NATIONAL_2024_PRES_MARGIN = -1.48; // Harris minus Trump
+const HOUSE_MAJORITY = 218;
+// 2024 presidential margin (Harris minus Trump, points) in each of the 435
+// districts, under 2026 district lines (The Downballot).
+const HOUSE_MARGINS: number[] = [-13.14,-36.02,-14.34,-46.69,-66.43,-29.11,-34.61,17.8,-45.29,-15.53,-24.89,-39.91,-3.11,-14.97,39.75,6.67,-19.98,-0.75,22.13,-16.33,-31.08,12.22,24.64,10.16,14.5,-20.7,8.4,12.81,34.06,11.42,33.55,67.72,73.89,0.37,34.76,47.89,48.11,38.97,28.45,34.41,-32.23,5.97,-1.85,-19.4,24.94,5.81,15.28,9.73,25.28,33.64,40.02,12.23,25,9.78,50.64,7.8,39.11,60.39,12.32,9.48,-12.23,14.2,13.13,48.96,35.17,3.94,16.16,10.08,3.39,12.1,18.25,18.26,17.57,56.07,39.78,-9.73,-18.25,-9.08,19.78,14.98,-1.83,22.88,7.73,14.06,23.36,5.59,14.74,-37.2,-18,-21.12,-11.84,-21.43,-30.09,-12.48,-16.21,-17.77,23.99,-15.69,-15.39,-13.32,-10.51,-19.85,-13.7,-22.09,-16.95,-30.22,37.16,-16.29,-10.28,13.73,38.7,-9.14,-18.39,-14.58,-25.45,-15.81,7.62,-29.7,52.47,71.59,49.94,-22.06,-30.59,-34.08,-20.78,-23.34,-14.16,42.33,-36.78,24.73,21.59,-8.47,-9.99,-4.41,-31.48,-45.07,-26.73,32.05,33.12,31.39,28.33,37.12,5.49,65.39,6.91,36.57,22.05,11.43,-43.42,10.47,5.19,-39.75,-22.68,4.74,0.4,-26.5,-31.19,-29.34,-16.81,-32.52,41.46,-35.88,-29.88,-31.27,-19.67,4.1,-23.29,-47.3,-41.33,18.94,-35.56,-63.88,-15.03,-38.23,47.37,-36,-34.23,-34.04,-30.09,13.62,23.68,18.98,19.72,45.17,20.68,63.1,26.42,10.76,-16.91,18.46,23.76,73.62,33.29,5.77,58.94,56.45,21.61,-9.05,-21.21,-30.09,7.84,-5.54,-27.02,23.31,-1.28,-1.98,-32.33,-6.55,16.08,37.96,41.06,-12,5.83,21.26,35.67,61.87,-19.67,-36.48,-14.29,57.19,-7.9,-26.72,-42.28,23.12,-38.85,-42.62,-54.08,-37.03,20.36,-29.18,-42.53,-11.55,-29.54,-11.55,33.85,-13.63,45.3,-17.78,-17.16,-13.82,-19.38,-15.84,-17.73,-9.5,46.2,-16.47,-15.08,-36.76,-13.04,4.62,-53.8,2,3.59,18.73,-12.55,8.36,-30.12,1.51,6.42,-1.17,24.19,-1.14,50.77,8.71,23.87,12.66,-1.81,5.2,2.26,-13.94,-0.74,2.32,-10.04,-13.93,-4.28,1.28,42.16,6.41,45.89,43.98,40.61,60.44,-24.37,63.6,59.28,31.75,48.26,33.11,0.56,3.33,1.78,14.15,-20.65,7.65,-21.01,-23.09,18.44,19.27,-2.6,-42.16,40.24,-42.64,-23.75,-34.62,-11.06,-15.62,-10.58,-7.79,55.07,-30.09,3.29,-20.36,-10.02,-21.53,-55.62,-45.54,-33.24,-17.72,37.79,-27.14,45.98,12.06,8.54,11.38,0.32,35.74,77.32,15.8,28.63,11.41,-3.2,-8.5,-37.94,-5.23,-21.36,19.19,-45.54,-33.36,-37.96,-22.77,5.5,22.16,6.79,-13.01,-13.91,-43.06,-23.58,-22.77,22.68,-26.34,-29.19,-57.84,-33.85,-35.73,-23.92,-23.08,-26.52,-22.4,-20.14,-21.14,-49.54,-22.84,-23.43,-24.71,-21.62,-22.93,23.43,-27.64,-19.79,-22.64,-34.39,-23.88,-46.2,-24.3,-17.87,16.43,-21.66,54.97,-51.69,28.53,-21.84,-22.27,-14.83,-16.13,-24.08,-23.83,-21.23,-10.38,30.45,47.17,-21.88,-17.79,32.75,-10.14,-10.46,-24.99,56.61,-20.92,23.63,-29,-41.38,-32.51,-4.94,-0.25,34.67,32.7,-12.28,-23.88,2.86,49.75,-44.06,8.36,34.29,31.77,28.69,23.67,-3.3,-20.67,-10.79,19.27,74.99,5.78,41.21,18,-4.51,40.15,-7.4,51.55,-22.15,-16.48,-22.5,-16.26,-44.36,-39.6,-46.22];
+const AS_OF = 'Oct 5, 2026';
+
+// Optional extra markers for past polling misses, e.g.
+// { year: 2020, error: -4, label: '2020 presidential polls' }. Same sign as the slider.
+// Final RealClearPolitics generic-ballot average vs the actual House popular vote.
+// 2010–2020 cross-checked against John McCormack's RCP comparison (x.com/McCormackJohn/
+// status/1588498758169681922; he has 2018 at +1.1 off an earlier count, the official D+8.6
+// gives +1.3). 2022: RCP R+2.5 vs R+2.8. 2024: RCP R+0.3 (47.0–46.7) vs R+2.6.
+// error = actual margin minus poll margin (D minus R), so negative = polls overstated Democrats.
+const historical: { year: number; error: number; label: string }[] = [
+	{ year: 2010, error: 2.6, label: '2010: polls R+9.4, result R+6.8' },
+	{ year: 2014, error: -3.3, label: '2014: polls R+2.4, result R+5.7' },
+	{ year: 2016, error: -1.7, label: '2016: polls D+0.6, result R+1.1' },
+	{ year: 2018, error: 1.3, label: '2018: polls D+7.3, result D+8.6' },
+	{ year: 2020, error: -3.7, label: '2020: polls D+6.8, result D+3.1' },
+	{ year: 2022, error: -0.3, label: '2022: polls R+2.5, result R+2.8' },
+	{ year: 2024, error: -2.3, label: '2024: polls R+0.3, result R+2.6' },
+];
+
+const config = {
+	senate: SENATE,
+	generic: GENERIC_BALLOT,
+	pres2024: NATIONAL_2024_PRES_MARGIN,
+	houseMajority: HOUSE_MAJORITY,
+	houseMargins: HOUSE_MARGINS,
+	historical,
+	min: -10,
+	max: 10,
+};
+const ticks = [-10, -5, 0, 5, 10];
+const tickLabel = (v: number) => (v === 0 ? '0' : v < 0 ? `R+${-v}` : `D+${v}`);
+const pct = (v: number) => ((v - config.min) / (config.max - config.min)) * 100;
+// Sorted so neighbours alternate rows and their year labels don't collide.
+const histSorted = [...historical].sort((a, b) => a.error - b.error);
+const housePct = (HOUSE_MAJORITY / HOUSE_MARGINS.length) * 100;
+---
+
+<figure class="pes" data-pes data-config={JSON.stringify(config)}>
+	<div class="pes-control">
+		<div class="pes-head">
+			<div>
+				<label class="pes-readout" data-readout aria-live="polite">Polls are exactly right</label>
+				<div class="pes-env">True national environment: <b data-env>D+8.7</b></div>
+			</div>
+			<button type="button" class="pes-reset" data-reset>Reset</button>
+		</div>
+
+		<div class="pes-slider" data-slider-wrap>
+			{
+				histSorted.length > 0 && (
+					<div class="pes-hist">
+						{histSorted.map((h, i) => (
+							<span
+								class={`pes-hm r${i % 2} m${i % 3}`}
+								style={`--p:${pct(h.error)}`}
+								title={h.label}
+								data-snap={h.error}
+								role="button"
+								tabindex="0"
+								aria-label={`Set the slider to the ${h.year} polling miss (${h.label})`}
+							>
+								<em>
+									<span class="pes-yr">{h.year}</span>
+									<span class="pes-yr-short">’{String(h.year).slice(2)}</span>
+								</em>
+								<i />
+							</span>
+						))}
+					</div>
+				)
+			}
+			<input
+				type="range"
+				data-slider
+				min={config.min}
+				max={config.max}
+				step="0.1"
+				value="0"
+				aria-label="Polling error in points; positive means the polls understated Democrats"
+			/>
+			<div class="pes-ticks">
+				{ticks.map((t) => (
+					<span
+						style={`--p:${pct(t)}`}
+						data-snap={t}
+						role="button"
+						tabindex="0"
+						aria-label={`Set the slider to ${tickLabel(t)}`}
+					>
+						{tickLabel(t)}
+					</span>
+				))}
+			</div>
+			<div class="pes-markers" data-markers>
+				<span class="pes-marker" data-marker="senate" role="button" tabindex="0"><i></i><em>Senate flips</em></span>
+				<span class="pes-marker low" data-marker="house" role="button" tabindex="0"><i></i><em>House flips</em></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="pes-panels">
+		<section class="pes-panel">
+			<div class="pes-ph">
+				<h3>Senate</h3>
+				<div class="pes-count">Democrats: <b data-sen-seats>52</b> / 100</div>
+				<div class="pes-status" data-sen-status></div>
+			</div>
+			<ul class="pes-cards" data-cards>
+				{
+					SENATE.races.map((r) => (
+						<li class="pes-card" data-state={r.state}>
+							<span class="pes-st"><span class="pes-full">{r.name}</span><abbr class="pes-abbr" title={r.name}>{r.state}</abbr></span>
+							<span class="pes-mg" data-mg />
+							<span class="pes-flip" data-flip hidden>flipped</span>
+						</li>
+					))
+				}
+			</ul>
+			<div class="pes-note" data-sen-note></div>
+		</section>
+
+		<section class="pes-panel">
+			<div class="pes-ph">
+				<h3>House</h3>
+				<div class="pes-count">Democrats: <b data-house-seats>236</b> / 435</div>
+				<div class="pes-status" data-house-status></div>
+			</div>
+			<div class="pes-bar" aria-hidden="true">
+				<i class="pes-bar-fill" data-house-fill></i>
+				<i class="pes-bar-mark" style={`left:${housePct}%`}></i>
+			</div>
+			<div class="pes-bar-lab" aria-hidden="true">
+				<span>0</span><span style={`left:${housePct}%`}>218 majority</span><span>435</span>
+			</div>
+			<div class="pes-note" data-house-note></div>
+		</section>
+	</div>
+
+	<figcaption>
+		Senate: polling averages from the 2026 Election Tracker as of {AS_OF}. House: 2024
+		presidential results by 2026 district (The Downballot), shifted by the generic ballot
+		(D+8.7). Each panel applies one uniform error to every race at once, the way a
+		national polling miss tends to behave. Past years: final RealClearPolitics generic-ballot
+		average vs. the actual House popular vote.
+	</figcaption>
+</figure>
+
+<style>
+	.pes {
+		--warm: #b06135;
+		--flip: #7650b3;
+		margin: 2.5em 0;
+		padding: 0;
+		font-family: var(--font-serif);
+	}
+	.pes-control {
+		padding-bottom: 1.1em;
+		border-bottom: 1px solid var(--rule);
+	}
+	.pes-readout {
+		display: block;
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: var(--ink);
+	}
+	.pes-env {
+		font-size: 0.85rem;
+		color: var(--ink-soft);
+		margin: 0.15em 0 0.9em;
+	}
+	.pes-env b {
+		color: var(--ink);
+	}
+
+	.pes-slider {
+		position: relative;
+		padding: 0 0 4.6em;
+	}
+	.pes-slider input[type='range'] {
+		display: block;
+		width: 100%;
+		margin: 0;
+		height: 28px;
+		background: transparent;
+		-webkit-appearance: none;
+		appearance: none;
+		cursor: pointer;
+	}
+	.pes-slider input[type='range']::-webkit-slider-runnable-track {
+		height: 6px;
+		background: var(--rule);
+		border-radius: 3px;
+	}
+	.pes-slider input[type='range']::-moz-range-track {
+		height: 6px;
+		background: var(--rule);
+		border-radius: 3px;
+	}
+	.pes-slider input[type='range']::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 20px;
+		height: 20px;
+		margin-top: -7px;
+		border-radius: 50%;
+		background: var(--accent);
+		border: 2px solid var(--bg);
+		box-shadow: 0 0 0 1px var(--accent);
+	}
+	.pes-slider input[type='range']::-moz-range-thumb {
+		width: 16px;
+		height: 16px;
+		border-radius: 50%;
+		background: var(--accent);
+		border: 2px solid var(--bg);
+		box-shadow: 0 0 0 1px var(--accent);
+	}
+	.pes-slider input[type='range']:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 4px;
+		border-radius: 4px;
+	}
+
+	/* Ticks and markers use the same thumb-width inset the native control uses,
+	   so they line up with where the thumb actually sits. */
+	[data-snap] {
+		cursor: pointer;
+		pointer-events: auto;
+	}
+	.pes-ticks [data-snap]:hover,
+	.pes-hm[data-snap]:hover {
+		color: var(--ink);
+	}
+	.pes-hm[data-snap]:hover i {
+		background: var(--ink);
+	}
+	.pes-marker[data-snap]:hover em {
+		text-decoration: underline;
+	}
+	[data-snap]:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+	.pes-hist {
+		position: relative;
+		height: 2.3em;
+	}
+	.pes-hm {
+		position: absolute;
+		bottom: -2px;
+		left: calc(var(--p) * 1% + (0.5 - var(--p) / 100) * 20px);
+		transform: translateX(-50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		font-size: 0.62rem;
+		line-height: 1.2;
+		color: var(--ink-soft);
+	}
+	.pes-hm em {
+		font-style: normal;
+		font-variant-numeric: tabular-nums;
+	}
+	.pes-hm i {
+		width: 1px;
+		height: 0.5em;
+		background: var(--ink-soft);
+	}
+	.pes-hm.r1 i {
+		height: 1.7em;
+	}
+	.pes-yr-short {
+		display: none;
+	}
+	/* Flip markers hang below the ticks; push them down past the history row when it exists. */
+	.pes-slider:has(.pes-hist) .pes-markers {
+		top: calc(44px + 2.3em);
+	}
+	.pes-ticks {
+		position: relative;
+		height: 1.2em;
+		margin-top: 2px;
+	}
+	.pes-ticks span,
+	.pes-marker {
+		position: absolute;
+		left: calc(var(--p) * 1% + (0.5 - var(--p) / 100) * 20px);
+		transform: translateX(-50%);
+	}
+	.pes-ticks span {
+		font-size: 0.7rem;
+		color: var(--ink-soft);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.pes-markers {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 44px;
+		height: 3.2em;
+		pointer-events: none;
+	}
+	/* Flip labels hang to the right of their tick so neither runs over the other's line. */
+	.pes-marker:not(.hist) {
+		transform: translateX(-1px);
+		align-items: flex-start;
+	}
+	.pes-marker:not(.hist) i {
+		left: 0;
+	}
+	.pes-marker:not(.hist) em {
+		padding-left: 0.35em;
+	}
+	.pes-marker :global(.pes-flip-env) {
+		display: block;
+	}
+	.pes-marker {
+		top: 1.4em;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		white-space: nowrap;
+	}
+	.pes-marker i {
+		position: absolute;
+		bottom: 100%;
+		width: 2px;
+		height: 1em;
+		margin-bottom: 0.1em;
+		background: var(--flip);
+	}
+	.pes-marker em {
+		font-size: 0.7rem;
+		font-style: italic;
+		color: var(--flip);
+	}
+	.pes-marker.stagger {
+		top: 3.5em;
+	}
+	.pes-marker.stagger i {
+		height: 3.1em;
+	}
+	.pes-marker.hist {
+		top: 0;
+		opacity: 0.8;
+	}
+	.pes-marker.hist i {
+		height: 0.5em;
+		background: var(--ink-soft);
+	}
+	.pes-marker.hist em {
+		font-size: 0.62rem;
+		color: var(--ink-soft);
+	}
+	.pes-marker.off {
+		display: none;
+	}
+	.pes-slider.stagger-pad {
+		padding-bottom: 5.4em;
+	}
+	.pes-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1em;
+	}
+	.pes-reset {
+		flex: none;
+		font: inherit;
+		font-size: 0.8rem;
+		padding: 0.35em 0.9em;
+		color: var(--accent);
+		background: transparent;
+		border: 1px solid var(--accent);
+		border-radius: 4px;
+		cursor: pointer;
+	}
+	.pes-reset:hover {
+		background: var(--accent-soft);
+	}
+	.pes-reset:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	.pes-panels {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1em;
+		padding-top: 0.9em;
+	}
+	.pes-panel {
+		min-width: 0;
+	}
+	.pes-panel h3 {
+		margin: 0 0 0.3em;
+		font-family: var(--font-serif);
+		font-size: 0.7rem;
+		font-weight: 400;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+	}
+	.pes-count {
+		font-size: 0.95rem;
+		color: var(--ink-soft);
+	}
+	.pes-count b {
+		font-size: 1.5rem;
+		color: var(--ink);
+		font-variant-numeric: tabular-nums;
+	}
+	.pes-ph {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0 0.8em;
+		margin-bottom: 0.5em;
+	}
+	.pes-ph h3 {
+		margin: 0;
+	}
+	.pes-status {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--warm);
+	}
+	.pes-status.dem {
+		color: var(--accent);
+	}
+
+	.pes-cards {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(10.5em, 1fr));
+		gap: 0.5em;
+	}
+	.pes-card {
+		position: relative;
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.4em;
+		padding: 0.35em 0.6em;
+		border: 1px solid var(--rule);
+		border-left: 3px solid var(--warm);
+		border-radius: 4px;
+		min-width: 0;
+	}
+	.pes-card.dem {
+		border-left-color: var(--accent);
+	}
+	.pes-st {
+		font-size: 0.78rem;
+		line-height: 1.3;
+		color: var(--ink);
+	}
+	.pes-mg {
+		font-size: 1rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		color: var(--warm);
+	}
+	.pes-card.dem .pes-mg {
+		color: var(--accent);
+	}
+	.pes-abbr {
+		display: none;
+		text-decoration: none;
+	}
+	.pes-flip {
+		position: absolute;
+		top: -0.75em;
+		right: 0.4em;
+		padding: 0 0.25em;
+		background: var(--bg);
+		line-height: 1.2;
+		font-size: 0.6rem;
+		font-style: italic;
+		color: var(--ink-soft);
+	}
+	.pes-card.flipped {
+		background: var(--bg-raised);
+		border-top-style: dashed;
+		border-right-style: dashed;
+		border-bottom-style: dashed;
+	}
+	.pes-note {
+		margin-top: 0.5em;
+		font-size: 0.78rem;
+		line-height: 1.45;
+		color: var(--ink-soft);
+	}
+
+	.pes-bar {
+		position: relative;
+		height: 12px;
+		background: var(--warm);
+		border-radius: 6px;
+		margin-top: 0.3em;
+	}
+	.pes-bar-fill {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		background: var(--accent);
+		border-radius: 6px 0 0 6px;
+	}
+	.pes-bar-mark {
+		position: absolute;
+		top: -4px;
+		bottom: -4px;
+		width: 2px;
+		margin-left: -1px;
+		background: var(--ink);
+	}
+	.pes-bar-lab {
+		position: relative;
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.68rem;
+		color: var(--ink-soft);
+		margin-top: 0.4em;
+		height: 1.1em;
+	}
+	.pes-bar-lab span:nth-child(2) {
+		position: absolute;
+		transform: translateX(-50%);
+		color: var(--ink);
+		white-space: nowrap;
+	}
+
+	figcaption {
+		margin-top: 1.4em;
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+
+	@media (max-width: 640px) {
+		.pes-cards {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		.pes-full {
+			display: none;
+		}
+		.pes-hist {
+			height: 3.4em;
+		}
+		.pes-slider:has(.pes-hist) .pes-markers {
+			top: calc(44px + 3.4em);
+		}
+		.pes-yr {
+			display: none;
+		}
+		.pes-yr-short {
+			display: inline;
+		}
+		.pes-hm.r1 i {
+			height: 0.5em;
+		}
+		.pes-hm.m1 i {
+			height: 1.7em;
+		}
+		.pes-hm.m2 i {
+			height: 2.9em;
+		}
+		.pes-abbr {
+			display: inline;
+		}
+	}
+
+	/* One warm token, flipped for dark twice over: the attribute covers BaseHead's
+	   theme script, the media query covers the paint before that script runs —
+	   global.css has already darkened its tokens by then. */
+	:global([data-theme='dark']) .pes {
+		--warm: #d98f63;
+		--flip: #b49ae6;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .pes {
+			--warm: #d98f63;
+			--flip: #b49ae6;
+		}
+	}
+</style>
+
+<script>
+	const fmtMargin = (m: number) => {
+		const r = Math.round(m * 10) / 10;
+		return r > 0 ? `D+${r.toFixed(1)}` : r < 0 ? `R+${Math.abs(r).toFixed(1)}` : 'Even';
+	};
+	const fmtPts = (v: number) => Math.abs(v).toFixed(1);
+
+	function init(root: HTMLElement) {
+		const cfg = JSON.parse(root.dataset.config!);
+		const q = <T extends Element>(s: string) => root.querySelector(s) as T;
+		const gb = cfg.generic.dem - cfg.generic.rep;
+		const swing = gb - cfg.pres2024;
+		const SEN_MAJ = cfg.senate.majority;
+
+		// Integer tenths of a point (t = e * 10) keep scans and comparisons free of float noise.
+		const senSeats = (t: number) =>
+			cfg.senate.baseDemSeats +
+			cfg.senate.races.filter((r: any) => Math.round(r.margin * 10) + t > 0).length;
+		const houseSeats = (t: number) =>
+			cfg.houseMargins.filter((m: number) => (m + swing) * 10 + t > 1e-9).length;
+
+		const tMin = Math.round(cfg.min * 10);
+		// Break-even: walking left from zero, the first step where Democrats lose control.
+		const breakEven = (seats: (t: number) => number, need: number) => {
+			if (seats(0) < need) return null;
+			for (let t = 0; t >= tMin; t--) if (seats(t) < need) return t / 10;
+			return null;
+		};
+		const senBE = breakEven(senSeats, SEN_MAJ);
+		const houseBE = breakEven(houseSeats, cfg.houseMajority);
+
+		const slider = q<HTMLInputElement>('[data-slider]');
+		const pct = (v: number) => ((v - cfg.min) / (cfg.max - cfg.min)) * 100;
+		const place = (el: HTMLElement, v: number) => el.style.setProperty('--p', String(pct(v)));
+
+		const mk = (name: string, v: number | null, text: string) => {
+			const el = q<HTMLElement>(`[data-marker="${name}"]`);
+			if (v === null) {
+				el.classList.add('off');
+				return;
+			}
+			place(el, v);
+			const em = el.querySelector('em')!;
+			em.textContent = `${text} at a ${Math.abs(v).toFixed(1)}-pt miss `;
+			const env = document.createElement('span');
+			env.className = 'pes-flip-env';
+			env.textContent = `(${fmtMargin(gb + v)})`;
+			em.append(env);
+			el.title = `${text} at a polling error of ${fmtPts(v)} points`;
+			el.dataset.snap = String(v);
+			el.setAttribute('aria-label', `Set the slider to where the ${text.replace(' flips', '')} flips`);
+		};
+		mk('senate', senBE, 'Senate flips');
+		mk('house', houseBE, 'House flips');
+		// Stagger the labels vertically when the two markers sit close together.
+		if (senBE !== null && houseBE !== null && Math.abs(pct(senBE) - pct(houseBE)) < 40) {
+			q<HTMLElement>('[data-marker="house"]').classList.add('stagger');
+			q<HTMLElement>('[data-slider-wrap]').classList.add('stagger-pad');
+		}
+
+		const cards = new Map<string, HTMLElement>();
+		root
+			.querySelectorAll<HTMLElement>('[data-cards] .pes-card')
+			.forEach((c) => cards.set(c.dataset.state!, c));
+		const baseWin = new Map<string, boolean>(cfg.senate.races.map((r: any) => [r.state, r.margin > 0]));
+		const baseHouse = cfg.houseMargins.map((m: number) => m + swing > 0);
+
+		function update() {
+			const t = Math.round(parseFloat(slider.value) * 10);
+			const e = t / 10;
+
+			const readout =
+				t === 0
+					? 'Polls are exactly right'
+					: e > 0
+						? `Polls understate Democrats by ${fmtPts(e)} pts`
+						: `Polls overstate Democrats by ${fmtPts(e)} pts`;
+			q('[data-readout]').textContent = readout;
+			slider.setAttribute('aria-valuetext', readout);
+			q('[data-env]').textContent = fmtMargin(gb + e);
+
+			let flips = 0;
+			for (const r of cfg.senate.races) {
+				const m = (Math.round(r.margin * 10) + t) / 10;
+				const dem = m > 0;
+				const c = cards.get(r.state)!;
+				c.classList.toggle('dem', dem);
+				const flipped = dem !== baseWin.get(r.state);
+				if (flipped) flips++;
+				c.classList.toggle('flipped', flipped);
+				c.querySelector<HTMLElement>('[data-flip]')!.hidden = !flipped;
+				c.querySelector('[data-mg]')!.textContent = fmtMargin(m);
+			}
+			const s = senSeats(t);
+			q('[data-sen-seats]').textContent = String(s);
+			const ss = q<HTMLElement>('[data-sen-status]');
+			ss.classList.toggle('dem', s >= SEN_MAJ);
+			ss.textContent =
+				s >= SEN_MAJ
+					? 'Majority'
+					: s === 50
+						? '50–50, Vance breaks tie: Republican control'
+						: 'Republican control';
+			q('[data-sen-note]').textContent =
+				flips === 0
+					? 'No race has changed hands.'
+					: `${flips} of ${cfg.senate.races.length} races changed hands.`;
+
+			const h = houseSeats(t);
+			q('[data-house-seats]').textContent = String(h);
+			q<HTMLElement>('[data-house-fill]').style.width = `${(h / cfg.houseMargins.length) * 100}%`;
+			const hs = q<HTMLElement>('[data-house-status]');
+			hs.classList.toggle('dem', h >= cfg.houseMajority);
+			hs.textContent = h >= cfg.houseMajority ? 'Majority' : 'Republican control';
+			let changed = 0;
+			cfg.houseMargins.forEach((m: number, i: number) => {
+				if ((m + swing) * 10 + t > 1e-9 !== baseHouse[i]) changed++;
+			});
+			q('[data-house-note]').textContent =
+				changed === 0
+					? 'No district has changed hands.'
+					: `${changed} district${changed === 1 ? '' : 's'} changed hands.`;
+		}
+
+		slider.addEventListener('input', update);
+		// Year ticks, axis labels and flip markers jump the slider to their value.
+		root.querySelectorAll<HTMLElement>('[data-snap]').forEach((el) => {
+			const snap = () => {
+				slider.value = el.dataset.snap!;
+				update();
+			};
+			el.addEventListener('click', snap);
+			el.addEventListener('keydown', (ev) => {
+				if (ev.key === 'Enter' || ev.key === ' ') {
+					ev.preventDefault();
+					snap();
+				}
+			});
+		});
+		q('[data-reset]').addEventListener('click', () => {
+			slider.value = '0';
+			update();
+		});
+		update();
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-pes]').forEach(init);
+</script>

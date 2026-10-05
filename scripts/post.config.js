@@ -17,15 +17,12 @@ export const VAULT =
 export const SITE = 'https://ajaycent.com';
 
 export const POST = {
-	note: `${VAULT}/9-9-26 2026 Midterm Prediction.md`,
-	slug: 'labor-day-2026-midterm-prediction',
+	note: `${VAULT}/10-5-26 How Wrong Can the Polls Be.md`,
+	slug: 'how-wrong-can-the-polls-be',
 
 	// Inline markers in the note, swapped for components in the .mdx. The note
 	// keeps a human-readable marker so the draft still reads straight through.
-	charts: [
-		{ marker: 'Chart 1', component: 'SenatePollsVsMarketsChart' },
-		{ marker: 'Chart 2', component: 'SenateSeatDistributionChart' },
-	],
+	charts: [{ marker: 'Chart 1', component: 'PollingErrorSlider' }],
 
 	/*
 	  Markdown tables in the note that render as styled components on the site.
@@ -35,32 +32,5 @@ export const POST = {
 	  component's array uses; only the fields `parse` returns are compared, so a
 	  component may carry extra presentation-only fields.
 	*/
-	tables: [
-		{
-			header: '| Key | 2026 | |',
-			component: 'MidtermKeysTable',
-			array: 'KEYS',
-			parse: (c) => ({
-				key: c[0],
-				held: c[1].replace(/\*/g, '') === 'TRUE',
-				evidence: c[2].replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>'),
-			}),
-		},
-		{
-			header: '| | Dem margin | Win probability |',
-			component: 'SenateRaceOddsTable',
-			array: 'RACES',
-			parse: (c) => ({
-				state: c[0],
-				margin: c[1].replace(/\*/g, '') === 'no polling' ? null : Number(c[1].split('\u2212').join('-')),
-				prob: c[2] === '\u2014' ? null : Number(c[2].replace('%', '')),
-			}),
-		},
-		{
-			header: '| Democrats win... | Seats |',
-			component: 'HouseCeilingTable',
-			array: 'TIERS',
-			parse: (c) => ({ label: c[0], seats: Number(c[1]) }),
-		},
-	],
+	tables: [],
 };
