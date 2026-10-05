@@ -7,8 +7,8 @@ Every rule here is derived from an actual before/after, not from taste. Each
 carries the evidence and a confidence level. Rules with one observation behind
 them are marked as such — treat them as leads, not laws.
 
-**Evidence base as of Sept 11, 2026:** one full draft-vs-edit comparison (Labor
-Day 2026 Midterm Prediction), plus the published text of two earlier posts whose
+**Evidence base as of Oct 5, 2026:** two full draft-vs-edit comparisons (Labor
+Day 2026 Midterm Prediction; How Wrong Can the Polls Be?), plus the published text of two earlier posts whose
 drafts are no longer available. That is thin, and it grows one post at a time —
 see *Keeping this current*.
 
@@ -90,7 +90,21 @@ consequence, rather than reporting fit statistics.
 **Connective tissue to his ongoing projects.** He added "which I plan to update
 as the race continues to unfold" to the tracker link, and "I have it as a
 longshot on the tracker" to the South Carolina passage. He wants posts to read
-as part of a continuing body of work, not standalone.
+as part of a continuing body of work, not standalone. **Confirmed on the polls
+post:** he added a whole closing paragraph tying it back to "my Labor Day
+Prediction post" and promising "an updated prediction closer to the election."
+(2 observations.)
+
+**A plain-language read on what a number means politically.** "53 seats" became
+"53 seats (...), which is a Fetterman-proof majority." He translates a seat
+count into its practical consequence. (1 observation.)
+
+**A short framing sentence before a number.** He inserted "The House feels
+safer." ahead of "It doesn't flip red until the miss reaches almost 6 points."
+(1 observation.)
+
+**A short gut-level kicker.** He ended the opening paragraph with "We've been
+burned before." (1 observation.)
 
 **Practical caveats in his own register:**
 
@@ -115,6 +129,12 @@ unprompted, but don't be coy about it either.
 - **Bolded thesis sentences** standing as their own paragraph, for the one claim
   a section exists to make.
 - **"blogpost"** as one word.
+- **Plain first person over hedged constructions.** "I'd be lying if I said I
+  wasn't excited too. But I'd still advise everyone to stay cautious" became
+  "To be honest, I'm excited too, but I want to highlight some caution." (1
+  observation.)
+- **ALL-CAPS for one word of spoken emphasis**, even inside a bolded sentence:
+  "Democrats STILL lose the Senate." (1 observation.)
 - **He flattens my dramatic contrasts.** "That's a genuinely strong signal, and
   it's also the least interesting thing in this post" → "However, there's one
   point of disagreement that's worth analyzing for a moment."
@@ -124,11 +144,16 @@ unprompted, but don't be coy about it either.
 **He does not proofread closely.** His edit introduced "the expected are still
 51," "rigged some districts on way or the other," and a missing sentence-final
 period, and left them for me to catch. **Flag typos explicitly rather than
-assuming they're intentional voice** — but never silently "fix" phrasing that
+assuming they're intentional voice**, and do it when re-reading his edited note,
+**before** running the publish step. On the polls post I only spotted two after
+the push ("(and surprisingly almost flipping Kansas as well)" doesn't parse as a
+clause; "Labor Day Prediction post" capitalization). Never silently "fix" phrasing that
 might be deliberate.
 
-**He edits voice, not substance.** In this post he changed essentially no
-numbers, no structure, and no analytical claims. The draft's job is to get the
+**He edits voice, not substance.** In the Labor Day post he changed essentially no
+numbers, no structure, and no analytical claims. **Confirmed on the polls post:**
+he accepted a correction to his own outline (an '18 repeat is 53 seats, not 54)
+without pushback and changed no figures. (2 observations.) The draft's job is to get the
 analysis and the architecture right; he'll handle how it sounds. Don't
 pre-emptively flatten the prose to guess at his voice — get the argument right
 and let him tune it.
