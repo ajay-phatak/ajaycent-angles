@@ -1,8 +1,14 @@
 ---
 import { KIT_FORM_ID } from '../consts';
+
+interface Props {
+	/** Quieter version for the end of a post, where it shouldn't outshout the essay. */
+	compact?: boolean;
+}
+const { compact = false } = Astro.props;
 ---
 
-<section class="subscribe-box">
+<section class:list={['subscribe-box', { compact }]}>
 	<p class="kicker">Newsletter</p>
 	<h2>Get new essays by email</h2>
 	<p>No spam, no schedule — just a note when something new is published. Unsubscribe anytime.</p>
@@ -21,6 +27,37 @@ import { KIT_FORM_ID } from '../consts';
 		padding: 1.6em;
 	}
 	.subscribe-box h2 { margin-bottom: 0.3em; }
+	.subscribe-box.compact {
+		position: relative;
+		margin-top: 3.5em;
+		padding: 1.1em 1.3em;
+		border-radius: 8px;
+		box-shadow: none;
+	}
+	/* Divider so the card reads as separate from the essay above it. */
+	.subscribe-box.compact::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: -1.75em;
+		height: 1px;
+		background: var(--rule);
+	}
+	.subscribe-box.compact .kicker { display: none; }
+	.subscribe-box.compact h2 {
+		font-size: 1.15rem;
+		margin: 0 0 0.25em;
+	}
+	.subscribe-box.compact > p {
+		font-size: 0.9rem;
+		color: var(--ink-soft);
+		margin: 0 0 0.8em;
+	}
+	.subscribe-box.compact input,
+	.subscribe-box.compact button.btn {
+		font-size: 0.9rem;
+	}
 	.subscribe-box form {
 		display: flex;
 		gap: 10px;
