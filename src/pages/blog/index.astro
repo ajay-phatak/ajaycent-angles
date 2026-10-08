@@ -7,9 +7,21 @@ import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
-const posts = (await getCollection('blog')).sort(
+const all = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+// Anything written before the blog launched (old Facebook posts) goes in Archives.
+const launch = all.find((p) => p.id === 'welcome-to-ajaycent-angles')!.data.pubDate;
+const posts = all.filter((p) => p.data.pubDate >= launch);
+const archived = all.filter((p) => p.data.pubDate < launch);
+
+// Chart previews from `npm run build:thumbs`: src/assets/thumbs/<slug>-<light|dark>.png
+const thumbFiles = import.meta.glob<{ default: ImageMetadata }>('../../assets/thumbs/*.png', {
+	eager: true,
+});
+const thumb = (slug: string, scheme: 'light' | 'dark') =>
+	thumbFiles[`../../assets/thumbs/${slug}-${scheme}.png`]?.default;
 ---
 
 <!doctype html>
@@ -50,6 +62,56 @@ const posts = (await getCollection('blog')).sort(
 			}
 			ul li:first-child .thumb { height: 160px; }
 			.thumb img { width: 100%; height: 100%; object-fit: cover; margin: 0; border-radius: 0; }
+			.thumb.chart { height: 200px; background: none; border: 1px solid var(--rule); }
+			ul li:first-child .thumb.chart { height: 320px; }
+			.thumb.chart img { object-position: center top; }
+			.thumb .dark { display: none; }
+			:global([data-theme='dark']) .thumb .light { display: none; }
+			:global([data-theme='dark']) .thumb .dark { display: block; }
+
+			.archives {
+				margin-top: 2.4rem;
+				border-radius: 10px;
+				background: var(--bg-raised);
+				border: 1px solid var(--rule);
+			}
+			.archives summary {
+				display: flex;
+				align-items: center;
+				gap: 0.8em;
+				padding: 1.1em 1.3em;
+				cursor: pointer;
+				list-style: none;
+			}
+			.archives summary::-webkit-details-marker { display: none; }
+			.archives summary:hover .archives-title { color: var(--accent); }
+			.folder { flex: none; color: var(--accent); }
+			.folder .open { display: none; }
+			.archives[open] .folder .open { display: inline; }
+			.archives[open] .folder .closed { display: none; }
+			.archives-title { margin: 0; color: var(--ink); font-size: 1.1rem; }
+			.archives-note { margin: 0; color: var(--ink-soft); font-size: 0.85rem; }
+			.chevron { margin-left: auto; color: var(--ink-soft); transition: transform 0.15s ease; }
+			.archives[open] .chevron { transform: rotate(90deg); }
+			.archives ol {
+				list-style: none;
+				margin: 0;
+				padding: 0 1.3em 0.6em;
+				border-top: 1px solid var(--rule);
+			}
+			.archives ol li { border-bottom: 1px solid var(--rule); }
+			.archives ol li:last-child { border-bottom: none; }
+			.archives ol a {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+				gap: 1em;
+				padding: 0.8em 0;
+				color: var(--ink);
+				text-decoration: none;
+			}
+			.archives ol a:hover { color: var(--accent); }
+			.archives ol .date { flex: none; }
 			.title {
 				margin: 0 0 0.3em;
 				color: var(--ink);
@@ -62,6 +124,8 @@ const posts = (await getCollection('blog')).sort(
 			@media (max-width: 720px) {
 				ul { grid-template-columns: 1fr; gap: 1em; }
 				ul li:first-child { grid-column: auto; }
+				ul li:first-child .thumb.chart, .thumb.chart { height: 190px; }
+				.archives ol a { flex-direction: column; gap: 0.2em; }
 			}
 		</style>
 	</head>
@@ -73,8 +137,13 @@ const posts = (await getCollection('blog')).sort(
 					posts.map((post, i) => (
 						<li>
 							<a href={`/blog/${post.id}/`}>
-								<div class="thumb">
-									{post.data.heroImage ? (
+								<div class={thumb(post.id, 'light') ? 'thumb chart' : 'thumb'}>
+									{thumb(post.id, 'light') ? (
+										<>
+											<Image class="light" width={960} src={thumb(post.id, 'light')!} alt="" />
+											<Image class="dark" width={960} src={thumb(post.id, 'dark') ?? thumb(post.id, 'light')!} alt="" />
+										</>
+									) : post.data.heroImage ? (
 										<Image width={720} height={360} src={post.data.heroImage} alt="" />
 									) : (
 										<svg width="40" height="40" viewBox="0 0 48 48" style={i % 2 ? 'transform:scaleX(-1)' : ''}>
@@ -98,6 +167,40 @@ const posts = (await getCollection('blog')).sort(
 					))
 				}
 			</ul>
+
+			{
+				archived.length > 0 && (
+					<details class="archives">
+						<summary>
+							<svg class="folder" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+								<path class="closed" d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2h8.4A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" />
+								<path class="open" d="M3 17.5v-11A1.5 1.5 0 0 1 4.5 5h4.6l2 2h7.4A1.5 1.5 0 0 1 20 8.5V10M3 17.5 5.6 11h16l-2.6 8H4.5A1.5 1.5 0 0 1 3 17.5z" />
+							</svg>
+							<div>
+								<h4 class="archives-title">Archives</h4>
+								<p class="archives-note">
+									{archived.length} posts written before this blog, originally on Facebook
+								</p>
+							</div>
+							<svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+								<path d="M9 6l6 6-6 6" />
+							</svg>
+						</summary>
+						<ol>
+							{archived.map((post) => (
+								<li>
+									<a href={`/blog/${post.id}/`}>
+										<span>{post.data.title}</span>
+										<span class="date">
+											<FormattedDate date={post.data.pubDate} />
+										</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					</details>
+				)
+			}
 		</main>
 		<Footer />
 	</body>
