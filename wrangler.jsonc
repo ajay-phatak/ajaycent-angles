@@ -1,0 +1,11 @@
+// Static Astro site served as Worker static assets. This file must stay committed: without it,
+// `npx wrangler deploy` in Workers Builds re-runs its Astro auto-setup on every deploy, which stamps
+// today's compatibility date and breaks the build whenever that date is newer than Wrangler's runtime.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ajaycent-angles",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
