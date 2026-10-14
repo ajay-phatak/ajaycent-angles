@@ -13,6 +13,7 @@ import Logo from './Logo.astro';
 			<HeaderLink href="/support">Support</HeaderLink>
 			<HeaderLink href="/privacy">Privacy</HeaderLink>
 			<a class="external" href="https://elections.ajaycent.com">Election Tracker ↗</a>
+			<a class="external games" href="https://games.ajaycent.com">Games ↗</a>
 		</div>
 		<button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
 			<svg viewBox="0 0 24 24" class="icon icon-sun" aria-hidden="true">
@@ -95,7 +96,7 @@ import Logo from './Logo.astro';
 	:global([data-theme='dark']) .icon-sun { display: none; }
 	:global([data-theme='dark']) .icon-moon { display: block; }
 	@media (max-width: 720px) {
-		a.external { display: none; }
+		a.external:not(.games) { display: none; }
 		.internal-links { gap: 1.1em; }
 	}
 	@media (max-width: 560px) {
@@ -104,8 +105,11 @@ import Logo from './Logo.astro';
 			order: 3;
 			flex-basis: 100%;
 			justify-content: flex-start;
+			flex-wrap: wrap;
+			column-gap: 1.1em;
+			row-gap: 0;
 		}
-		.internal-links :global(a) { padding: 0.5em 0 0.7em; }
+		.internal-links :global(a), a.external { padding: 0.5em 0 0.7em; }
 	}
 </style>
 <script is:inline>
