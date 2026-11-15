@@ -1,0 +1,296 @@
+---
+// President's approval just before each midterm vs. House seats the president's party lost.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch dot-blue"></i>Democratic president</span>
+		<span><i class="swatch dot-red"></i>Republican president</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="approval-seats-chart"
+			role="img"
+			aria-label="Scatter plot of presidential approval just before each midterm from 1946 through 2026 (x-axis, 25 to 70 percent) against the change in House seats for the president's party (y-axis). Presidents with approval above 55 percent lost between 18 seats and none, or gained seats, as in 1998 and 2002. Below 50 percent approval, losses range from 4 seats to 63 seats. The 2026 point, Trump at 38 percent approval and a 45-seat loss, sits among the worst years, near 1946, 2006 and 2018."
+		>
+			Presidents with approval above 55 percent before the midterm lost few seats or gained
+			some (1998 and 2002). Below 50 percent, losses ranged from 4 seats to 63. Trump's 2026
+			point, 38 percent approval and a 45-seat loss, sits among the worst years.
+		</canvas>
+	</div>
+
+	<figcaption>
+		Approval: last Gallup reading before each midterm, via the American Presidency Project
+		(UC Santa Barbara). The 2026 point is the polling average on the 2026 Election Tracker on
+		Nov 1 (37.9%). House seat changes: Wikipedia; 2026 is projected with a handful of races
+		uncalled.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 11px;
+		height: 11px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+	.dot-blue { background: rgba(63, 94, 190, 0.8); }
+	.dot-red { background: rgba(196, 60, 48, 0.8); }
+	:global([data-theme='dark']) .dot-blue { background: rgba(110, 140, 235, 0.85); }
+	:global([data-theme='dark']) .dot-red { background: rgba(235, 110, 100, 0.85); }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .dot-blue { background: rgba(110, 140, 235, 0.85); }
+		:global(:root:not([data-theme='light'])) .dot-red { background: rgba(235, 110, 100, 0.85); }
+	}
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 440px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 400px; }
+	}
+	@media (max-width: 560px) {
+		.chart-canvas { height: 440px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	// [year, president, party, approval %, House seat change for president's party]
+	const pts = [
+		[1946, 'Truman', 'D', 27, -54],
+		[1950, 'Truman', 'D', 41, -28],
+		[1954, 'Eisenhower', 'R', 62, -18],
+		[1958, 'Eisenhower', 'R', 57, -48],
+		[1962, 'Kennedy', 'D', 61, -4],
+		[1966, 'Johnson', 'D', 44, -47],
+		[1970, 'Nixon', 'R', 58, -12],
+		[1974, 'Ford', 'R', 53, -48],
+		[1978, 'Carter', 'D', 45, -15],
+		[1982, 'Reagan', 'R', 42, -26],
+		[1986, 'Reagan', 'R', 64, -5],
+		[1990, 'Bush', 'R', 57, -8],
+		[1994, 'Clinton', 'D', 48, -54],
+		[1998, 'Clinton', 'D', 65, 4],
+		[2002, 'Bush', 'R', 67, 8],
+		[2006, 'Bush', 'R', 37, -32],
+		[2010, 'Obama', 'D', 45, -63],
+		[2014, 'Obama', 'D', 41, -13],
+		[2018, 'Trump', 'R', 44, -41],
+		[2022, 'Biden', 'D', 40, -9],
+		[2026, 'Trump', 'R', 38, -45],
+	].map(([year, pres, party, approval, house]) => ({ year, pres, party, approval, house }));
+	const LAST = pts.length - 1;
+
+	// Label offsets [dx, dy, align] where the default (right of the point) would collide.
+	const NUDGE = {
+		2014: [-8, 0, 'right'],
+		1974: [-8, 0, 'right'],
+		2026: [-8, 0, 'right'],
+		2022: [-8, 0, 'right'],
+		1982: [-8, 0, 'right'],
+		1998: [0, -10, 'center'],
+		1970: [8, 3, 'left'],
+		1962: [-8, 0, 'right'],
+	};
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function partyColors(dark) {
+		return {
+			d: dark ? 'rgba(110, 140, 235, 0.8)' : 'rgba(63, 94, 190, 0.7)',
+			r: dark ? 'rgba(235, 110, 100, 0.8)' : 'rgba(196, 60, 48, 0.7)',
+			dFull: dark ? 'rgb(110, 140, 235)' : 'rgb(63, 94, 190)',
+			rFull: dark ? 'rgb(235, 110, 100)' : 'rgb(196, 60, 48)',
+		};
+	}
+
+	function render() {
+		const canvas = document.getElementById('approval-seats-chart');
+		if (!canvas) return;
+		const c = palette();
+		const col = partyColors(c.dark);
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'approvalSeatsOverlay',
+			beforeDatasetsDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				if (!a) return;
+				const y0 = scales.y.getPixelForValue(0);
+				ctx.save();
+				ctx.strokeStyle = c.inkSoft;
+				ctx.globalAlpha = 0.5;
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.moveTo(a.left, y0);
+				ctx.lineTo(a.right, y0);
+				ctx.stroke();
+				ctx.restore();
+			},
+			afterDatasetsDraw(ch) {
+				const { ctx, scales } = ch;
+				ctx.save();
+				ctx.textBaseline = 'middle';
+				pts.forEach((p, i) => {
+					const last = i === LAST;
+					const x = scales.x.getPixelForValue(p.approval);
+					const y = scales.y.getPixelForValue(p.house);
+					const [dx, dy, align] = NUDGE[p.year] || [8, 0, 'left'];
+					const r = last ? 8 : 5;
+					const off = last ? r - 5 : 0;
+					ctx.textAlign = align;
+					ctx.font = `${last ? '600' : '500'} ${narrow ? 9.5 : 10.5}px ${c.serif}`;
+					ctx.fillStyle = last ? c.ink : c.inkSoft;
+					const label = last
+						? narrow ? '2026' : '2026 (Trump)'
+						: narrow ? `’${String(p.year).slice(2)}` : String(p.year);
+					const sx = align === 'left' ? off : align === 'right' ? -off : 0;
+					ctx.fillText(label, x + dx + sx, y + dy);
+				});
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'scatter',
+			data: {
+				datasets: [
+					{
+						label: 'Midterms',
+						data: pts.map((p) => ({ x: p.approval, y: p.house })),
+						backgroundColor: pts.map((p, i) => (i === LAST ? col[p.party.toLowerCase() + 'Full'] : col[p.party.toLowerCase()])),
+						borderColor: pts.map((_p, i) => (i === LAST ? c.ink : c.bg)),
+						borderWidth: pts.map((_p, i) => (i === LAST ? 2 : 1.25)),
+						pointRadius: pts.map((_p, i) => (i === LAST ? 8 : narrow ? 4.5 : 5)),
+						pointHoverRadius: pts.map((_p, i) => (i === LAST ? 9.5 : 6.5)),
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 12, right: narrow ? 14 : 20, left: 4, bottom: 4 } },
+				interaction: { mode: 'nearest', intersect: true },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => {
+								const p = pts[items[0].dataIndex];
+								return `${p.year} · ${p.pres} (${p.party})`;
+							},
+							label: (x) => {
+								const p = pts[x.dataIndex];
+								return [
+									`Approval: ${p.approval}%`,
+									`House seats: ${p.house > 0 ? '+' : p.house < 0 ? '−' : ''}${Math.abs(p.house)}${x.dataIndex === LAST ? ' (projected)' : ''}`,
+								];
+							},
+						},
+					},
+				},
+				scales: {
+					x: {
+						min: 25,
+						max: 70,
+						title: {
+							display: true,
+							text: narrow ? 'Approval before midterm (%)' : 'President’s approval just before the midterm (%)',
+							color: c.ink,
+							font: { family: c.serif, size: narrow ? 11 : 12 },
+						},
+						ticks: {
+							stepSize: 5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => (narrow && v % 10 !== 5 ? '' : `${v}%`),
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { color: c.rule },
+					},
+					y: {
+						min: -70,
+						max: 15,
+						title: {
+							display: true,
+							text: narrow ? 'House seat change' : 'House seat change for the president’s party',
+							color: c.ink,
+							font: { family: c.serif, size: narrow ? 11 : 12 },
+						},
+						ticks: {
+							stepSize: 10,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => (v > 0 ? `+${v}` : v < 0 ? `−${Math.abs(v)}` : '0'),
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[ApprovalVsSeatsChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

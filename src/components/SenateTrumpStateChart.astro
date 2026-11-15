@@ -1,0 +1,287 @@
+---
+// Dumbbell chart: 2024 presidential margin vs. 2026 Senate margin, by state.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch dot-hollow"></i>2024 presidential margin</span>
+		<span><i class="swatch dot-blue"></i>2026 Senate margin (Democratic win)</span>
+		<span>Number: shift toward Democrats, in points</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="senate-trump-state-chart"
+			role="img"
+			aria-label="Dumbbell chart of eleven Senate states, showing the 2024 presidential margin (hollow dot) and the 2026 Senate margin (filled dot), from Republican plus 25 to Democratic plus 25. States are sorted from most Republican in 2024 at the top. In every state the Democratic Senate margin is to the right of the presidential margin except Maine, where it is slightly lower. Texas moved from Republican plus 13.7 for president to Democratic plus 12.1 for Senate, a 25.8 point shift. North Carolina moved from Republican plus 3.2 to Democratic plus 19.8. Mississippi, the most Republican state, narrowly went Democratic by 0.8 points."
+		>
+			In every state but Maine, the 2026 Senate margin was more Democratic than the 2024
+			presidential margin. Texas shifted 25.8 points, from R+13.7 to D+12.1; North Carolina
+			shifted 23.0 points, from R+3.2 to D+19.8; Mississippi flipped by 0.8 points.
+		</canvas>
+	</div>
+
+	<figcaption>
+		2024 presidential margins and 2026 Senate margins: Wikipedia state results pages,
+		preliminary as of Nov 14, 2026. *Alaska has not been called; the margin shown is the
+		first-choice count before ranked-choice tabulation.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 11px;
+		height: 11px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+	.dot-hollow { border: 2px solid var(--ink-soft); background: transparent; box-sizing: border-box; }
+	.dot-blue { background: rgb(63, 94, 190); }
+	:global([data-theme='dark']) .dot-blue { background: rgb(110, 140, 235); }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .dot-blue { background: rgb(110, 140, 235); }
+	}
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 440px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 420px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	// [state, 2024 presidential margin (D minus R), 2026 Senate margin (D minus R), winner, loser]
+	const rows = [
+		['Mississippi', -22.9, 0.8, 'Scott Colom', 'Cindy Hyde-Smith'],
+		['South Carolina', -17.9, 4.5, 'Annie Andrews', 'Darline Graham'],
+		['Kansas', -16.1, 5.1, 'Adam Hamilton', 'Roger Marshall'],
+		['Texas', -13.7, 12.1, 'James Talarico', 'Ken Paxton'],
+		['Iowa', -13.2, 4.2, 'Josh Turek', 'Ashley Hinson'],
+		['Alaska*', -13.1, 3.7, 'Mary Peltola', 'Dan Sullivan'],
+		['Ohio', -11.2, 4.9, 'Sherrod Brown', 'Jon Husted'],
+		['North Carolina', -3.2, 19.8, 'Roy Cooper', 'Michael Whatley'],
+		['Georgia', -2.2, 18.1, 'Jon Ossoff', 'Mike Collins'],
+		['Michigan', -1.4, 7.1, 'Abdul El-Sayed', 'Mike Rogers'],
+		['Maine', 6.9, 6.2, 'Troy Jackson', 'Susan Collins'],
+	]
+		.map(([state, pres, sen, winner, loser]) => ({ state, pres, sen, winner, loser }))
+		// Biggest shift toward Democrats first, so the labeled number orders the rows.
+		.sort((a, b) => b.sen - b.pres - (a.sen - a.pres));
+	const fmtShift = (r) => {
+		const s = r.sen - r.pres;
+		return (s >= 0 ? '+' : '−') + Math.abs(s).toFixed(1);
+	};
+	const HILITE = 'Texas';
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	const fmtMargin = (v, digits = 1) => (v > 0 ? 'D+' : v < 0 ? 'R+' : 'Even ') + Math.abs(v).toFixed(digits);
+	const fmtTick = (v) => (v > 0 ? `D+${v}` : v < 0 ? `R+${-v}` : 'Even');
+
+	function render() {
+		const canvas = document.getElementById('senate-trump-state-chart');
+		if (!canvas) return;
+		const c = palette();
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const blue = c.dark ? '110, 140, 235' : '63, 94, 190';
+		const red = c.dark ? '235, 110, 100' : '196, 60, 48';
+		const winColor = (r, a) => `rgba(${r.sen >= 0 ? blue : red}, ${a})`;
+		const alphaFor = (r) => (r.state === HILITE ? 1 : 0.78);
+		const rOuter = narrow ? 5 : 6;
+
+		const overlay = {
+			id: 'senateDumbbellOverlay',
+			afterDatasetsDraw(ch) {
+				const { ctx, scales } = ch;
+				ctx.save();
+				rows.forEach((r, i) => {
+					const y = scales.y.getPixelForValue(i);
+					const xp = scales.x.getPixelForValue(r.pres);
+					const xs = scales.x.getPixelForValue(r.sen);
+					const hi = r.state === HILITE;
+					ctx.globalAlpha = hi ? 1 : 0.85;
+
+					// 2024 presidential margin: hollow dot
+					ctx.beginPath();
+					ctx.arc(xp, y, rOuter - 0.5, 0, Math.PI * 2);
+					ctx.fillStyle = c.bg;
+					ctx.fill();
+					ctx.lineWidth = hi ? 2 : 1.6;
+					ctx.strokeStyle = hi ? c.ink : c.inkSoft;
+					ctx.stroke();
+
+					// 2026 Senate margin: filled dot
+					ctx.beginPath();
+					ctx.arc(xs, y, hi ? rOuter + 1 : rOuter, 0, Math.PI * 2);
+					ctx.fillStyle = winColor(r, alphaFor(r));
+					ctx.fill();
+					ctx.lineWidth = 1.25;
+					ctx.strokeStyle = c.bg;
+					ctx.stroke();
+
+					// Value label next to the filled dot, clear of the hollow one
+					ctx.globalAlpha = 1;
+					ctx.font = `${hi ? '700' : '500'} ${narrow ? 10 : 11}px ${c.serif}`;
+					ctx.fillStyle = hi ? c.ink : c.inkSoft;
+					ctx.textBaseline = 'middle';
+					ctx.textAlign = 'left';
+					ctx.fillText(fmtShift(r),Math.max(xp, xs) + rOuter + 5, y + 0.5);
+				});
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'bar',
+			data: {
+				labels: rows.map((r) => r.state),
+				datasets: [
+					{
+						label: 'Shift',
+						data: rows.map((r) => [Math.min(r.pres, r.sen), Math.max(r.pres, r.sen)]),
+						backgroundColor: rows.map((r) => (r.state === HILITE ? c.inkSoft : c.rule)),
+						borderWidth: 0,
+						barThickness: 3,
+						borderSkipped: false,
+					},
+				],
+			},
+			options: {
+				indexAxis: 'y',
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 6, right: 6, bottom: 2 } },
+				interaction: { mode: 'nearest', axis: 'y', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => rows[items[0].dataIndex].state,
+							label: (x) => {
+								const r = rows[x.dataIndex];
+								const shift = r.sen - r.pres;
+								const out = [
+									`2024 presidential: ${fmtMargin(r.pres)}`,
+									`2026 Senate: ${fmtMargin(r.sen)}`,
+									`Shift: ${Math.abs(shift).toFixed(1)} pts ${shift >= 0 ? 'toward Democrats' : 'toward Republicans'}`,
+									`${r.winner} over ${r.loser}`,
+								];
+								if (r.state.endsWith('*')) out.push('Not yet called; first-choice count as of Nov 14');
+								return out;
+							},
+						},
+					},
+				},
+				scales: {
+					x: {
+						min: -25,
+						max: 30,
+						title: {
+							display: !narrow,
+							text: '← Republican margin  ·  Democratic margin →',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: narrow ? 10 : 5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							maxRotation: 0,
+							callback: (v) => (narrow && Math.abs(v) % 20 !== 0 && v !== 0 ? (v % 10 === 0 ? fmtTick(v) : '') : fmtTick(v)),
+						},
+						afterBuildTicks(axis) {
+							const step = narrow ? 10 : 5;
+							const ticks = [];
+							for (let v = -25; v <= 30; v += step) ticks.push({ value: v });
+							if (narrow) ticks.splice(0, ticks.length, ...[-20, -10, 0, 10, 20, 30].map((value) => ({ value })));
+							axis.ticks = ticks;
+						},
+						grid: {
+							color: (ctx) => (ctx.tick.value === 0 ? c.inkSoft : c.rule),
+							lineWidth: (ctx) => (ctx.tick.value === 0 ? 1.75 : 1),
+							drawTicks: false,
+						},
+						border: { display: false },
+					},
+					y: {
+						ticks: {
+							autoSkip: false,
+							color: (ctx) => (rows[ctx.index]?.state === HILITE ? c.ink : c.inkSoft),
+							font: (ctx) => ({
+								family: c.serif,
+								size: narrow ? 10.5 : 12,
+								weight: rows[ctx.index]?.state === HILITE ? '700' : '400',
+							}),
+						},
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[SenateTrumpStateChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

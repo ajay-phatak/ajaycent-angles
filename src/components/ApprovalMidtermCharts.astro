@@ -1,0 +1,12 @@
+---
+// Presidential approval before each midterm against the result, switchable
+// between the House popular-vote swing and House seats lost.
+import ChartSwap from './ChartSwap.astro';
+import ApprovalVsSwingChart from './ApprovalVsSwingChart.astro';
+import ApprovalVsSeatsChart from './ApprovalVsSeatsChart.astro';
+---
+
+<ChartSwap label="Compare approval with" a="Popular vote swing" b="House seats lost">
+	<ApprovalVsSwingChart slot="a" />
+	<ApprovalVsSeatsChart slot="b" />
+</ChartSwap>

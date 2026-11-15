@@ -1,0 +1,277 @@
+---
+// Midterm swing against the president's party, 1946 – 2026, in House popular-vote points.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch bar-blue"></i>Democrats gained (Republican president)</span>
+		<span><i class="swatch bar-red"></i>Republicans gained (Democratic president)</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="midterm-swing-chart"
+			role="img"
+			aria-label="Bar chart of the swing in the national House popular-vote margin against the president's party at each midterm from 1946 through 2026, in points. Bars are blue when Democrats gained and red when Republicans gained. The 2026 swing of 16.5 points is the second largest on record, behind only 2010 at 17.3 points, and ahead of 1946 at 13.2, 1966 at 12.0, 1994 at 11.8 and 1974 at 11.5. In 2002 the president's party gained ground, a swing of negative 4.3 points."
+		>
+			The 2026 midterm swung the House popular vote 16.5 points against the president's party,
+			second only to 2010 at 17.3 points. Other large swings: 1946 (13.2), 1966 (12.0), 1994
+			(11.8) and 1974 (11.5). Only 2002 moved in the president's favor.
+		</canvas>
+	</div>
+
+	<figcaption>
+		House popular vote: Wikipedia election infoboxes (Clerk of the House totals), margin is
+		Democratic share minus Republican share. Swing is the change in that margin from the
+		preceding presidential-year House vote, signed so that positive means the president's
+		party lost ground. Seat changes: Wikipedia, United States midterm election. 2026 figures
+		are preliminary as of Nov 14, 2026, with a handful of House races uncalled.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.bar-blue { height: 11px; background: rgba(63, 94, 190, 0.55); }
+	.bar-red { height: 11px; background: rgba(196, 60, 48, 0.55); }
+	:global([data-theme='dark']) .bar-blue { background: rgba(110, 140, 235, 0.6); }
+	:global([data-theme='dark']) .bar-red { background: rgba(235, 110, 100, 0.6); }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .bar-blue { background: rgba(110, 140, 235, 0.6); }
+		:global(:root:not([data-theme='light'])) .bar-red { background: rgba(235, 110, 100, 0.6); }
+	}
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 400px;
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 340px; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	/*
+	  [year, president, president's party, previous presidential-year House margin
+	  (D minus R), midterm House margin (D minus R), swing against president's party,
+	  House seat change for president's party, Senate seat change for president's party]
+	*/
+	const rows = [
+		[1946, 'Truman', 'D', 4.7, -8.5, 13.2, -54, -10],
+		[1950, 'Truman', 'D', 7.2, 0.7, 6.5, -28, -5],
+		[1954, 'Eisenhower', 'R', 0.5, 5.5, 5.0, -18, -2],
+		[1958, 'Eisenhower', 'R', 2.5, 12.4, 9.9, -48, -12],
+		[1962, 'Kennedy', 'D', 10.0, 5.3, 4.7, -4, 4],
+		[1966, 'Johnson', 'D', 14.7, 2.7, 12.0, -47, -3],
+		[1970, 'Nixon', 'R', 1.7, 8.7, 7.0, -12, 2],
+		[1974, 'Ford', 'R', 5.3, 16.8, 11.5, -48, -4],
+		[1978, 'Carter', 'D', 13.6, 8.9, 4.7, -15, -2],
+		[1982, 'Reagan', 'R', 2.7, 11.8, 9.1, -26, 0],
+		[1986, 'Reagan', 'R', 5.1, 9.9, 4.8, -5, -8],
+		[1990, 'Bush', 'R', 7.7, 7.8, 0.1, -8, -1],
+		[1994, 'Clinton', 'D', 5.0, -6.8, 11.8, -54, -9],
+		[1998, 'Clinton', 'D', 0.1, -1.1, 1.2, 4, 0],
+		[2002, 'Bush', 'R', -0.5, -4.8, -4.3, 8, 2],
+		[2006, 'Bush', 'R', -2.6, 8.0, 10.6, -32, -6],
+		[2010, 'Obama', 'D', 10.5, -6.8, 17.3, -63, -6],
+		[2014, 'Obama', 'D', 1.1, -5.7, 6.8, -13, -9],
+		[2018, 'Trump', 'R', -1.0, 8.6, 9.6, -41, 2],
+		[2022, 'Biden', 'D', 3.1, -2.7, 5.8, -9, 1],
+		[2026, 'Trump', 'R', -2.6, 13.9, 16.5, -45, -9],
+	].map(([year, pres, party, prev, mid, swing, house, senate]) => ({
+		year, pres, party, prev, mid, swing, house, senate,
+		// The party opposing the president gains, unless the swing is negative.
+		gainer: (party === 'R') === (swing >= 0) ? 'd' : 'r',
+	}));
+	const LAST = rows.length - 1;
+	const LABELED = new Set([2026, 2010, 1946, 1966, 1994, 1974]);
+	const LABELED_NARROW = new Set([2026, 2010, 1946]);
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function partyFill(dark) {
+		return {
+			d: dark ? 'rgba(110, 140, 235, 0.6)' : 'rgba(63, 94, 190, 0.55)',
+			r: dark ? 'rgba(235, 110, 100, 0.6)' : 'rgba(196, 60, 48, 0.55)',
+			dEdge: dark ? '#8fa3d9' : '#4a5f9e',
+			rEdge: dark ? '#d99a8f' : '#a2544a',
+		};
+	}
+
+	const signed = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
+	const signedPct = (v) => (v > 0 ? 'D+' : v < 0 ? 'R+' : 'Even ') + Math.abs(v).toFixed(1);
+
+	function render() {
+		const canvas = document.getElementById('midterm-swing-chart');
+		if (!canvas) return;
+		const c = palette();
+		const fills = partyFill(c.dark);
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const withAlpha = (color, a) => color.replace(/[\d.]+\)$/, a + ')');
+		const labeled = narrow ? LABELED_NARROW : LABELED;
+
+		const overlay = {
+			id: 'midtermSwingOverlay',
+			afterDatasetsDraw(ch) {
+				const { ctx, scales } = ch;
+				ctx.save();
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'bottom';
+				rows.forEach((r, i) => {
+					if (!labeled.has(r.year)) return;
+					const last = i === LAST;
+					ctx.font = `${last ? '600' : '500'} ${narrow ? 9.5 : 10.5}px ${c.serif}`;
+					ctx.fillStyle = last ? c.ink : c.inkSoft;
+					ctx.fillText(
+						r.swing.toFixed(1),
+						scales.x.getPixelForValue(i),
+						scales.y.getPixelForValue(Math.max(r.swing, 0)) - 4,
+					);
+				});
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'bar',
+			data: {
+				labels: rows.map((r) => r.year),
+				datasets: [
+					{
+						label: 'Swing against president’s party',
+						data: rows.map((r) => r.swing),
+						backgroundColor: rows.map((r, i) =>
+							i === LAST ? withAlpha(fills[r.gainer], 0.95) : withAlpha(fills[r.gainer], c.dark ? 0.38 : 0.34),
+						),
+						borderColor: rows.map((r) => fills[r.gainer + 'Edge']),
+						borderWidth: rows.map((_r, i) => (i === LAST ? 1.5 : 0)),
+						categoryPercentage: 0.92,
+						barPercentage: 0.9,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				layout: { padding: { top: 18, right: 6 } },
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => {
+								const r = rows[items[0].dataIndex];
+								return `${r.year} · ${r.pres} (${r.party})`;
+							},
+							label: (x) => {
+								const r = rows[x.dataIndex];
+								const out = [
+									`Swing against president’s party: ${r.swing > 0 ? '+' : r.swing < 0 ? '−' : ''}${Math.abs(r.swing).toFixed(1)} pts`,
+									`House vote: ${signedPct(r.prev)} → ${signedPct(r.mid)}`,
+									`House seats: ${signed(r.house)}${x.dataIndex === LAST ? ' (projected)' : ''}`,
+									`Senate seats: ${signed(r.senate)}`,
+								];
+								if (x.dataIndex === LAST) out.push('Preliminary; House seats projected');
+								return out;
+							},
+						},
+					},
+				},
+				scales: {
+					y: {
+						min: -5,
+						max: 20,
+						title: {
+							display: true,
+							text: narrow ? 'Swing vs. president (pts)' : 'Swing against the president’s party (points)',
+							color: c.ink,
+							font: { family: c.serif, size: narrow ? 11 : 12 },
+						},
+						ticks: {
+							stepSize: 5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+						},
+						grid: { color: (ctx) => (ctx.tick.value === 0 ? c.inkSoft : c.rule), drawTicks: false },
+						border: { display: false },
+					},
+					x: {
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							autoSkip: false,
+							maxRotation: 0,
+							callback: (_v, i) => (narrow && i % 2 !== 0 ? '' : rows[i].year),
+						},
+						grid: { display: false },
+						border: { color: c.rule },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[MidtermSwingChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

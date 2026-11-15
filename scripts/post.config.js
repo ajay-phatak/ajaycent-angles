@@ -17,12 +17,18 @@ export const VAULT =
 export const SITE = 'https://ajaycent.com';
 
 export const POST = {
-	note: `${VAULT}/10-5-26 How Wrong Can the Polls Be.md`,
-	slug: 'how-wrong-can-the-polls-be',
+	note: `${VAULT}/11-14-26 Reflecting on the 2026 Midterms.md`,
+	slug: 'reflecting-on-the-2026-midterms',
 
 	// Inline markers in the note, swapped for components in the .mdx. The note
 	// keeps a human-readable marker so the draft still reads straight through.
-	charts: [{ marker: 'Chart 1', component: 'PollingErrorSlider' }],
+	charts: [
+		// Charts 1 and 2 are each a pair behind a two-button switch (ChartSwap).
+		{ marker: 'Chart 1', component: 'MidtermScaleCharts' },
+		{ marker: 'Chart 2', component: 'ApprovalMidtermCharts' },
+		{ marker: 'Chart 3', component: 'ApprovalTimelineChart' },
+		{ marker: 'Chart 4', component: 'SenateTrumpStateChart' },
+	],
 
 	/*
 	  Markdown tables in the note that render as styled components on the site.

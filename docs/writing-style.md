@@ -7,8 +7,9 @@ Every rule here is derived from an actual before/after, not from taste. Each
 carries the evidence and a confidence level. Rules with one observation behind
 them are marked as such — treat them as leads, not laws.
 
-**Evidence base as of Oct 5, 2026:** two full draft-vs-edit comparisons (Labor
-Day 2026 Midterm Prediction; How Wrong Can the Polls Be?), plus the published text of two earlier posts whose
+**Evidence base as of Nov 14, 2026:** three full draft-vs-edit comparisons (Labor
+Day 2026 Midterm Prediction; How Wrong Can the Polls Be?; Reflecting on the 2026
+Midterms), plus the published text of two earlier posts whose
 drafts are no longer available. That is thin, and it grows one post at a time —
 see *Keeping this current*.
 
@@ -85,6 +86,26 @@ the second kind even when they're the first.
 If a limitation genuinely matters, put it in plain language and tie it to a
 consequence, rather than reporting fit statistics.
 
+**Rallying closers and tidy synthesis lines.** On the midterms reflection he cut
+the whole ending:
+
+> That's the case to make: these aren't two separate agendas. A government
+> that's for sale is a government that isn't working on your grocery bill.
+>
+> Voters just handed Democrats the biggest win in half a century. Now they have
+> to use it.
+
+and replaced it with "As for me, I'm just excited to start writing about
+anything other than politics for a little while lol." He also cut "Do it
+anyway, and make every Republican senator vote on it." **End on a casual,
+personal note, not a call to action.** (1 observation, but it is the same
+instinct as the aphorism cuts above.)
+
+**Supporting detail that interrupts a sentence's point.** Cut from the same
+post: "who just won Georgia by 18 points" after Ossoff's name, and the Massie
+sentence after the Hegseth one. The stat or the sourcing was accurate; it just
+slowed the line down. (1 observation.)
+
 ## What he adds
 
 **Connective tissue to his ongoing projects.** He added "which I plan to update
@@ -114,12 +135,33 @@ burned before." (1 observation.)
 **Explicit ownership of the call.** He added "So here are my official
 predictions roughly 2 months out:" before the conclusions.
 
+**Jokes and personal asides in parentheses.** Midterms reflection: "(damn you,
+Jensen...)", "(I'm personally salivating at the idea of Annie Andrews, a
+pediatrician, holding RFK Jr.'s feet to the fire here)", "so I guess you'll
+just have to trust me." Don't write these for him; leave room for them.
+(1 observation, consistent with the conversational asides under Voice.)
+
+**His own political read where I had only procedure.** I wrote that the Senate
+"probably won't convict either one, since that takes 67 votes." He replaced it
+with "I actually believe there's a reasonable possibility for some Republicans
+to break ranks on these." He also added a sentence on the optics value of
+passing bills that will be vetoed. (1 observation.)
+
+**Softeners on confident claims.** "real credit" → "some credit"; "he did" →
+"so it's not that unexpected"; added "(at least not at this scale)". At the
+same time he sharpened the partisan vocabulary: "the Trump regime",
+"superstars like Jon Ossoff". Hedge the analysis, not the politics.
+(1 observation.)
+
 **Casual disclosure of AI help.** He wrote "(with the help of some AI
 extrapolation from Lichtman's work, thanks Claude)" himself. Don't add this
 unprompted, but don't be coy about it either.
 
 ## Voice and mechanics
 
+- **Oxford comma, always.** He manually added one to "Texas, Kansas, South
+  Carolina and Mississippi" and asked for it to be recorded as a standing
+  preference (Midterms reflection, Nov 2026). (Stated preference, not inferred.)
 - **"Let's" for walkthroughs.** "Let's plot every race" (his) over "Plot every
   race" (mine); "Let's look at them" in the fiscal post.
 - **Conversational asides**, often parenthetical and unpunctuated-run-on: "(and
@@ -137,7 +179,15 @@ unprompted, but don't be coy about it either.
   "Democrats STILL lose the Senate." (1 observation.)
 - **He flattens my dramatic contrasts.** "That's a genuinely strong signal, and
   it's also the least interesting thing in this post" → "However, there's one
-  point of disagreement that's worth analyzing for a moment."
+  point of disagreement that's worth analyzing for a moment." **Confirmed on the
+  midterms reflection:** "I called that 'a number that cannot happen.' It
+  happened." → "The keys model said Republicans would lose 40 to 60 House
+  seats, and it actually happened." (2 observations.)
+- **He folds a setup line into the bolded thesis** rather than giving the thesis
+  its own paragraph after a lead-in: "I think the simplest answer is the right
+  one." + bolded line → "It wasn't because Democrats cracked the code, **this
+  was mostly a referendum on a historically unpopular president.**"
+  (1 observation.)
 
 ## Process notes
 
@@ -153,7 +203,9 @@ might be deliberate.
 **He edits voice, not substance.** In the Labor Day post he changed essentially no
 numbers, no structure, and no analytical claims. **Confirmed on the polls post:**
 he accepted a correction to his own outline (an '18 repeat is 53 seats, not 54)
-without pushback and changed no figures. (2 observations.) The draft's job is to get the
+without pushback and changed no figures. **Confirmed again on the midterms
+reflection:** no numbers or structure changed, and he accepted the reframing of
+"biggest ever" to "second-biggest swing since WWII". (3 observations.) The draft's job is to get the
 analysis and the architecture right; he'll handle how it sounds. Don't
 pre-emptively flatten the prose to guess at his voice — get the argument right
 and let him tune it.

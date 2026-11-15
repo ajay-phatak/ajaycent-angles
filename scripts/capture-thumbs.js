@@ -16,6 +16,7 @@ const OUT = 'src/assets/thumbs';
 
 // slug -> selector of the element to capture
 const THUMBS = {
+	'reflecting-on-the-2026-midterms': '#midterm-swing-chart',
 	'how-wrong-can-the-polls-be': 'figure.pes .pes-control',
 	'labor-day-2026-midterm-prediction': '#seat-distribution-chart',
 	'fiscal-responsibility-in-america': '#debt-chart',

@@ -1,0 +1,385 @@
+---
+// Trump approve / disapprove averages, May 2025 – Election Day 2026, with event markers.
+---
+
+<figure class="chart">
+	<div class="chart-legend">
+		<span><i class="swatch line-ink"></i>Approve</span>
+		<span><i class="swatch line-warm"></i>Disapprove</span>
+		<span><i class="swatch line-dash"></i>Key events</span>
+	</div>
+
+	<div class="chart-canvas">
+		<canvas
+			id="approval-timeline-chart"
+			role="img"
+			aria-label="Line chart of Donald Trump's approval and disapproval averages from May 2025 through Election Day, November 3, 2026. Approval starts near 46 percent and disapproval near 50 percent. By Election Day approval is 38.4 percent and disapproval 59.3 percent. Vertical markers show the shutdown beginning on October 1, 2025, the Minneapolis shootings on January 7, 2026, the Supreme Court striking down tariffs on February 20, the Iran war beginning on February 28, the ceasefire collapsing on July 8, and Election Day."
+		>
+			Trump's approval average fell from about 46 percent in May 2025 to 38.4 percent on
+			Election Day 2026, while disapproval rose from about 50 percent to 59.3 percent.
+		</canvas>
+	</div>
+
+	<ol class="event-key" aria-hidden="true">
+		<li><b>1</b> Shutdown begins (Oct 1)</li>
+		<li><b>2</b> Minneapolis shootings (Jan 7)</li>
+		<li><b>3</b> Supreme Court strikes down tariffs (Feb 20)</li>
+		<li><b>4</b> Iran war begins (Feb 28)</li>
+		<li><b>5</b> Ceasefire collapses (Jul 8)</li>
+		<li><b>6</b> Election Day (Nov 3)</li>
+	</ol>
+
+	<figcaption>
+		Approval average: VoteHub, via the 2026 Election Tracker (elections.ajaycent.com), May
+		2025 through Election Day.
+	</figcaption>
+</figure>
+
+<style>
+	.chart {
+		margin: 2.5em 0;
+		padding: 0;
+	}
+	.chart-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		margin-bottom: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+	.chart-legend span {
+		display: flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.swatch {
+		display: inline-block;
+		width: 18px;
+		flex-shrink: 0;
+	}
+	.line-ink { height: 3px; background: var(--ink); }
+	.line-warm { height: 3px; background: #b06135; }
+	.line-dash { height: 0; border-top: 2px dashed var(--ink-soft); opacity: 0.7; }
+	:global([data-theme='dark']) .line-warm { background: #d98f63; }
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .line-warm { background: #d98f63; }
+	}
+
+	.chart-canvas {
+		position: relative;
+		width: 100%;
+		height: 420px;
+	}
+	.event-key {
+		display: none;
+		list-style: none;
+		margin: 0.8em 0 0;
+		padding: 0;
+		font-family: var(--font-serif);
+		font-size: 0.75rem;
+		line-height: 1.6;
+		color: var(--ink-soft);
+	}
+	.event-key b {
+		display: inline-block;
+		min-width: 1.4em;
+		color: var(--ink);
+	}
+	figcaption {
+		margin-top: 0.9em;
+		font-family: var(--font-serif);
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.5;
+		color: var(--ink-soft);
+	}
+	@media (max-width: 720px) {
+		.chart-canvas { height: 380px; }
+	}
+	@media (max-width: 560px) {
+		.chart-canvas { height: 360px; }
+		.event-key { display: block; }
+	}
+</style>
+
+<script>
+	import Chart from 'chart.js/auto';
+	import { palette, onThemeChange } from '../scripts/chart-theme.js';
+
+	/* VoteHub averages via the 2026 Election Tracker: [date, approve %, disapprove %]. */
+	const raw = [
+		['2025-05-24', 46, 50.5], ['2025-05-28', 45.9, 50.9], ['2025-06-01', 45.8, 50.4], ['2025-06-05', 46, 50.3],
+		['2025-06-09', 45.6, 51.3], ['2025-06-13', 44.7, 51.7], ['2025-06-17', 45.4, 51.5], ['2025-06-21', 45.1, 51.9],
+		['2025-06-25', 44.8, 52.2], ['2025-06-29', 44.8, 51.5], ['2025-07-03', 44.9, 51.5], ['2025-07-07', 44.9, 51.5],
+		['2025-07-11', 45.3, 51.4], ['2025-07-15', 44.8, 52.1], ['2025-07-19', 44.6, 52.8], ['2025-07-23', 44.4, 52.7],
+		['2025-07-27', 44.4, 52.7], ['2025-07-31', 43.7, 53.3], ['2025-08-04', 44.1, 52.5], ['2025-08-08', 44.1, 52.6],
+		['2025-08-12', 43.5, 53.3], ['2025-08-16', 43.8, 53.1], ['2025-08-20', 44.5, 52.5], ['2025-08-24', 44.2, 52.7],
+		['2025-08-28', 43.8, 52.4], ['2025-09-01', 43.9, 52.1], ['2025-09-05', 44.6, 51.7], ['2025-09-09', 44.6, 51.7],
+		['2025-09-13', 44.4, 52], ['2025-09-17', 44.3, 52.5], ['2025-09-21', 44.8, 52.4], ['2025-09-25', 44.1, 52.8],
+		['2025-09-29', 44.1, 52.7], ['2025-10-03', 44.2, 53], ['2025-10-07', 44, 52.8], ['2025-10-11', 43.9, 53],
+		['2025-10-15', 43.9, 52.8], ['2025-10-19', 44.2, 51.7], ['2025-10-23', 43.8, 52.3], ['2025-10-27', 43.8, 52.4],
+		['2025-10-31', 43.6, 53], ['2025-11-04', 43, 53.9], ['2025-11-08', 42.8, 53.7], ['2025-11-12', 42.8, 53.7],
+		['2025-11-16', 42.3, 54.4], ['2025-11-20', 42, 55.4], ['2025-11-24', 42.3, 54.7], ['2025-11-28', 41.8, 54.8],
+		['2025-12-02', 41.9, 54.3], ['2025-12-06', 42.2, 54.1], ['2025-12-10', 42.4, 53.9], ['2025-12-14', 42.3, 54.2],
+		['2025-12-18', 42.5, 54], ['2025-12-22', 42.5, 53.9], ['2025-12-26', 42.3, 54], ['2025-12-30', 42.3, 54.1],
+		['2026-01-03', 42.5, 53.6], ['2026-01-07', 42.1, 54.3], ['2026-01-11', 42.1, 54.3], ['2026-01-15', 41.6, 54.6],
+		['2026-01-19', 41.7, 55.4], ['2026-01-23', 41.2, 55.6], ['2026-01-27', 41.4, 55], ['2026-01-31', 41.2, 55.6],
+		['2026-02-04', 41.9, 54.9], ['2026-02-08', 41.9, 54.9], ['2026-02-12', 41.4, 55.7], ['2026-02-16', 41, 55.7],
+		['2026-02-20', 41.6, 55.4], ['2026-02-24', 41.5, 56], ['2026-02-28', 41.6, 55.9], ['2026-03-04', 42.9, 54.7],
+		['2026-03-08', 42.6, 54.5], ['2026-03-12', 42, 54.7], ['2026-03-16', 41.8, 54.5], ['2026-03-20', 41.6, 54.6],
+		['2026-03-24', 40.9, 55.3], ['2026-03-28', 40.6, 56.1], ['2026-04-01', 40.2, 56.7], ['2026-04-05', 40.5, 56.9],
+		['2026-04-09', 40.2, 56.8], ['2026-04-13', 40, 56.8], ['2026-04-17', 39.9, 56.6], ['2026-04-21', 38.8, 57.9],
+		['2026-04-25', 39, 58.6], ['2026-04-29', 39.6, 58.1], ['2026-05-03', 39.8, 57.3], ['2026-05-07', 40.2, 56.9],
+		['2026-05-11', 40, 56.8], ['2026-05-15', 39.9, 57.3], ['2026-05-19', 39.5, 58], ['2026-05-23', 39.3, 57.9],
+		['2026-05-27', 39.2, 58], ['2026-05-31', 39, 57.8], ['2026-06-04', 39.5, 57.1], ['2026-06-08', 39.9, 56.8],
+		['2026-06-12', 40.2, 56.8], ['2026-06-16', 40.4, 56.9], ['2026-06-20', 39.9, 57.8], ['2026-06-24', 39.4, 58.7],
+		['2026-06-28', 39.9, 57.9], ['2026-07-02', 40.2, 57.3], ['2026-07-06', 40.2, 56], ['2026-07-10', 40.7, 55.5],
+		['2026-07-14', 41.1, 55.3], ['2026-07-18', 40.5, 56.4], ['2026-07-22', 39.7, 57.6], ['2026-07-26', 39.2, 57.9],
+		['2026-07-30', 38.1, 59.5], ['2026-08-03', 38, 59.1], ['2026-08-07', 38.6, 58.8], ['2026-08-11', 38.6, 58.8],
+		['2026-08-15', 38.8, 58.6], ['2026-08-16', 38.8, 58.6], ['2026-08-17', 38.8, 58.4], ['2026-08-18', 38.7, 58.4],
+		['2026-08-19', 38.7, 58.4], ['2026-08-20', 38.4, 58.4], ['2026-08-21', 38.4, 58.4], ['2026-08-22', 38.4, 58.4],
+		['2026-08-23', 38.4, 58.4], ['2026-08-24', 38.4, 58.4], ['2026-08-25', 38.6, 58.2], ['2026-08-26', 38.6, 58.6],
+		['2026-08-27', 38.6, 58.7], ['2026-08-28', 38.6, 58.7], ['2026-08-29', 38.9, 58.5], ['2026-08-30', 38.9, 58.6],
+		['2026-08-31', 38.3, 59], ['2026-09-01', 38.4, 59], ['2026-09-02', 38.4, 59], ['2026-09-03', 38.8, 58.5],
+		['2026-09-04', 38.7, 58], ['2026-09-05', 38.7, 58], ['2026-09-06', 38.5, 58.4], ['2026-09-07', 38.5, 58.4],
+		['2026-09-08', 38.4, 58.4], ['2026-09-09', 38.6, 58.5], ['2026-09-10', 38.6, 58.6], ['2026-09-11', 38.1, 58.5],
+		['2026-09-12', 38.1, 58.5], ['2026-09-13', 38.1, 58.6], ['2026-09-14', 38.1, 58.6], ['2026-09-15', 38.3, 58.7],
+		['2026-09-16', 38.3, 58.7], ['2026-09-17', 38.5, 58.9], ['2026-09-18', 38.6, 59.2], ['2026-09-19', 38.7, 59.2],
+		['2026-09-20', 38.7, 59.2], ['2026-09-21', 38.3, 59.5], ['2026-09-22', 38.4, 59.7], ['2026-09-23', 37.8, 60.6],
+		['2026-09-24', 37.7, 60.4], ['2026-09-25', 37.7, 60.4], ['2026-09-26', 37.7, 60.5], ['2026-09-27', 37.7, 60.5],
+		['2026-09-28', 37.7, 60.5], ['2026-09-29', 37.3, 60.6], ['2026-09-30', 37.4, 60.6], ['2026-10-01', 37, 61.1],
+		['2026-10-02', 36.8, 61.1], ['2026-10-03', 36.8, 61.2], ['2026-10-04', 36.8, 61.2], ['2026-10-05', 36.9, 60.6],
+		['2026-10-06', 36.9, 60.7], ['2026-10-07', 36.9, 60.6], ['2026-10-08', 36.9, 60.6], ['2026-10-09', 36.4, 61.2],
+		['2026-10-10', 36.4, 61.2], ['2026-10-11', 36.4, 61.2], ['2026-10-12', 36.9, 60.6], ['2026-10-13', 37, 60.6],
+		['2026-10-14', 37, 60.5], ['2026-10-15', 37.4, 60.5], ['2026-10-16', 37.4, 60.5], ['2026-10-17', 37.4, 60.5],
+		['2026-10-18', 37.5, 60.5], ['2026-10-19', 37.7, 60.5], ['2026-10-20', 37.7, 60.5], ['2026-10-21', 36.9, 61.2],
+		['2026-10-22', 37.2, 61.1], ['2026-10-23', 37.2, 61.1], ['2026-10-24', 37.2, 61.1], ['2026-10-25', 37.2, 61],
+		['2026-10-26', 37.2, 61], ['2026-10-27', 37.5, 60.6], ['2026-10-28', 37.8, 60.5], ['2026-10-29', 37.6, 60.2],
+		['2026-10-30', 37.6, 60.1], ['2026-10-31', 37.6, 60.1], ['2026-11-01', 37.9, 60], ['2026-11-02', 38.3, 59.3],
+		['2026-11-03', 38.4, 59.3],
+	];
+	const pts = raw.map(([d, a, b]) => ({ t: Date.parse(d + 'T12:00:00Z'), approve: a, disapprove: b }));
+	const T0 = pts[0].t;
+	const T1 = pts[pts.length - 1].t;
+
+	const events = [
+		{ d: '2025-10-01', label: 'Shutdown begins' },
+		{ d: '2026-01-07', label: 'Minneapolis shootings' },
+		{ d: '2026-02-20', label: 'Supreme Court strikes down tariffs' },
+		{ d: '2026-02-28', label: 'Iran war begins' },
+		{ d: '2026-07-08', label: 'Ceasefire collapses' },
+		{ d: '2026-11-03', label: 'Election Day' },
+	].map((e) => ({ ...e, t: Date.parse(e.d + 'T12:00:00Z') }));
+	// Vertical slot (0 = lowest row) for each marker label so neighbors don't collide.
+	const SLOTS = [1, 0, 3, 2, 1, 0];
+
+	const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	const fmtTick = (t) => {
+		const d = new Date(t);
+		return `${MONTHS[d.getUTCMonth()]} ’${String(d.getUTCFullYear()).slice(2)}`;
+	};
+	const fmtDay = (t) => {
+		const d = new Date(t);
+		return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+	};
+
+	const NARROW = () => window.matchMedia('(max-width: 560px)').matches;
+
+	function render() {
+		const canvas = document.getElementById('approval-timeline-chart');
+		if (!canvas) return;
+		const c = palette();
+		const narrow = NARROW();
+		Chart.getChart(canvas)?.destroy();
+
+		const overlay = {
+			id: 'approvalTimelineOverlay',
+			afterDatasetsDraw(ch) {
+				const { ctx, chartArea: a, scales } = ch;
+				const rowH = narrow ? 17 : 15;
+				ctx.save();
+
+				// Event markers
+				events.forEach((e, i) => {
+					const x = scales.x.getPixelForValue(e.t);
+					ctx.setLineDash([4, 3]);
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = c.inkSoft;
+					ctx.globalAlpha = 0.7;
+					ctx.beginPath();
+					ctx.moveTo(x, a.top);
+					ctx.lineTo(x, a.bottom);
+					ctx.stroke();
+					ctx.setLineDash([]);
+					ctx.globalAlpha = 1;
+
+					const y = a.bottom - 10 - SLOTS[i] * rowH;
+					if (narrow) {
+						const r = 7.5;
+						ctx.beginPath();
+						ctx.arc(x, y, r, 0, Math.PI * 2);
+						ctx.fillStyle = c.bg;
+						ctx.fill();
+						ctx.lineWidth = 1;
+						ctx.strokeStyle = c.inkSoft;
+						ctx.stroke();
+						ctx.fillStyle = c.ink;
+						ctx.font = `600 9.5px ${c.serif}`;
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						ctx.fillText(String(i + 1), x, y + 0.5);
+					} else {
+						const right = i === events.length - 1;
+						ctx.font = `italic 10.5px ${c.serif}`;
+						ctx.textBaseline = 'middle';
+						ctx.textAlign = right ? 'right' : 'left';
+						const w = ctx.measureText(e.label).width;
+						const tx = right ? x - 5 : x + 5;
+						ctx.fillStyle = c.bg;
+						ctx.globalAlpha = 0.85;
+						ctx.fillRect(right ? tx - w - 2 : tx - 2, y - 7, w + 4, 14);
+						ctx.globalAlpha = 1;
+						ctx.fillStyle = c.ink;
+						ctx.fillText(e.label, tx, y);
+					}
+				});
+
+				// End-of-line value labels
+				const last = pts[pts.length - 1];
+				ctx.font = `600 ${narrow ? 10 : 11}px ${c.serif}`;
+				ctx.textAlign = 'left';
+				ctx.textBaseline = 'middle';
+				const ex = scales.x.getPixelForValue(T1) + 6;
+				ctx.fillStyle = c.warm;
+				ctx.fillText(`${last.disapprove.toFixed(1)}%`, ex, scales.y.getPixelForValue(last.disapprove));
+				ctx.fillStyle = c.ink;
+				ctx.fillText(`${last.approve.toFixed(1)}%`, ex, scales.y.getPixelForValue(last.approve));
+				ctx.restore();
+			},
+		};
+
+		new Chart(canvas, {
+			type: 'line',
+			data: {
+				datasets: [
+					{
+						label: 'Disapprove',
+						data: pts.map((p) => ({ x: p.t, y: p.disapprove })),
+						borderColor: c.warm,
+						borderWidth: 2.25,
+						pointRadius: 0,
+						pointHoverRadius: 4,
+						tension: 0.2,
+					},
+					{
+						label: 'Approve',
+						data: pts.map((p) => ({ x: p.t, y: p.approve })),
+						borderColor: c.ink,
+						borderWidth: 2.25,
+						pointRadius: 0,
+						pointHoverRadius: 4,
+						tension: 0.2,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				animation: false,
+				parsing: false,
+				layout: { padding: { top: 8, right: narrow ? 36 : 44 } },
+				interaction: { mode: 'index', axis: 'x', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: c.tooltipBg,
+						titleColor: c.ink,
+						bodyColor: c.inkSoft,
+						borderColor: c.rule,
+						borderWidth: 1,
+						titleFont: { family: c.serif },
+						bodyFont: { family: c.serif },
+						callbacks: {
+							title: (items) => fmtDay(items[0].parsed.x),
+							label: (x) => `${x.dataset.label}: ${x.parsed.y.toFixed(1)}%`,
+						},
+					},
+				},
+				scales: {
+					x: {
+						type: 'linear',
+						min: T0,
+						max: T1,
+						afterBuildTicks(axis) {
+							// Tick at the first of every Nth month.
+							const step = narrow ? 6 : 3;
+							const ticks = [];
+							const start = new Date(T0);
+							let y = start.getUTCFullYear();
+							let m = start.getUTCMonth();
+							m = Math.ceil(m / step) * step;
+							for (;;) {
+								if (m >= 12) { y += Math.floor(m / 12); m %= 12; }
+								const t = Date.UTC(y, m, 1);
+								if (t > T1) break;
+								if (t >= T0) ticks.push({ value: t });
+								m += step;
+							}
+							axis.ticks = ticks;
+						},
+						ticks: {
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							maxRotation: 0,
+							autoSkip: false,
+							callback: (v) => fmtTick(v),
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { color: c.rule },
+					},
+					y: {
+						min: 30,
+						max: 65,
+						title: {
+							display: !narrow,
+							text: 'Share of Americans (%)',
+							color: c.ink,
+							font: { family: c.serif, size: 12 },
+						},
+						ticks: {
+							stepSize: 5,
+							color: c.inkSoft,
+							font: { family: c.serif, size: narrow ? 10 : 11 },
+							callback: (v) => `${v}%`,
+						},
+						grid: { color: c.rule, drawTicks: false },
+						border: { display: false },
+					},
+				},
+			},
+			plugins: [overlay],
+		});
+	}
+
+	let queued;
+	function scheduleRender() {
+		clearTimeout(queued);
+		queued = setTimeout(() => {
+			try {
+				render();
+			} catch (err) {
+				console.error('[ApprovalTimelineChart] render failed', err);
+			}
+		}, 50);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', scheduleRender);
+	} else {
+		scheduleRender();
+	}
+	onThemeChange(scheduleRender);
+	window.matchMedia('(max-width: 560px)').addEventListener('change', scheduleRender);
+</script>

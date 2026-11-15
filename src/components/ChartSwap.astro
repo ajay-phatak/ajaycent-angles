@@ -1,0 +1,83 @@
+---
+// Two charts in one slot with a two-button switch above them. The first slot
+// ("a") shows by default; both are in the page, so the hidden one still has
+// its text fallback for readers without JS (who see both, stacked).
+interface Props {
+	label: string; // what the switch chooses between, e.g. "Measure the wave by"
+	a: string; // button text for slot "a"
+	b: string; // button text for slot "b"
+}
+const { label, a, b } = Astro.props;
+---
+
+<div class="chart-swap">
+	<div class="chart-swap-bar" role="group" aria-label={label}>
+		<span class="chart-swap-label">{label}</span>
+		<button type="button" data-show="a" aria-pressed="true">{a}</button>
+		<button type="button" data-show="b" aria-pressed="false">{b}</button>
+	</div>
+	<div class="chart-swap-panel" data-panel="a"><slot name="a" /></div>
+	<div class="chart-swap-panel" data-panel="b"><slot name="b" /></div>
+</div>
+
+<style>
+	.chart-swap {
+		margin: 2.5em 0;
+	}
+	.chart-swap-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5em;
+		font-family: var(--font-serif);
+		font-size: 0.8rem;
+		color: var(--ink-soft);
+	}
+	.chart-swap-label {
+		margin-right: 0.3em;
+	}
+	button {
+		font: inherit;
+		color: var(--ink-soft);
+		background: transparent;
+		border: 1px solid var(--rule);
+		border-radius: 999px;
+		padding: 0.3em 0.9em;
+		cursor: pointer;
+	}
+	button:hover {
+		color: var(--ink);
+		border-color: var(--ink-soft);
+	}
+	button[aria-pressed='true'] {
+		color: var(--accent-contrast);
+		background: var(--accent);
+		border-color: var(--accent);
+	}
+	button:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+	/* The charts bring their own 2.5em figure margin; the wrapper owns it here. */
+	.chart-swap-panel :global(figure.chart) {
+		margin: 1em 0 0;
+	}
+	.chart-swap-panel[hidden] {
+		display: none;
+	}
+</style>
+
+<script>
+	for (const root of document.querySelectorAll('.chart-swap')) {
+		const buttons = root.querySelectorAll('button[data-show]');
+		const panels = root.querySelectorAll('.chart-swap-panel');
+		const show = (which) => {
+			for (const p of panels) p.hidden = p.dataset.panel !== which;
+			for (const btn of buttons) btn.setAttribute('aria-pressed', String(btn.dataset.show === which));
+			// The revealed canvas was laid out at zero size while hidden.
+			window.dispatchEvent(new Event('resize'));
+		};
+		for (const btn of buttons) btn.addEventListener('click', () => show(btn.dataset.show));
+		show('a');
+	}
+</script>

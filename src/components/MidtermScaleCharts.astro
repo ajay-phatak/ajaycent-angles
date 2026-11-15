@@ -1,0 +1,12 @@
+---
+// The size of each midterm wave since 1946, switchable between the House
+// popular-vote swing and House seats lost.
+import ChartSwap from './ChartSwap.astro';
+import MidtermSwingChart from './MidtermSwingChart.astro';
+import MidtermSeatsChart from './MidtermSeatsChart.astro';
+---
+
+<ChartSwap label="Measure each midterm by" a="Popular vote swing" b="House seats lost">
+	<MidtermSwingChart slot="a" />
+	<MidtermSeatsChart slot="b" />
+</ChartSwap>
